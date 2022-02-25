@@ -1,8 +1,51 @@
 [package]
-name = "bevy-jam"
+name = "bevy-jam-1"
+publish = false
 version = "0.1.0"
 edition = "2021"
+authors = ["Vitor Freitas Buchalla <vitorfreitasdev@gmail.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[features]
+default = [
+  "bevy/bevy_winit",
+  "bevy/render",
+  "bevy/png",
+  "bevy/x11",
+  "bevy_kira_audio/ogg",
+  "heron/2d",
+]
+
+dev = [
+  "bevy/dynamic",
+  "heron/debug-2d",
+]
+
+debug = ["bevy-inspector-egui"]
+
 [dependencies]
+rand = "0.8.3"
+bevy = { version = "0.6", default-features = false }
+heron = "2.0.1"
+bevy_ecs_tilemap = "0.5.0"
+benimator = "2.0.1"
+bevy_kira_audio = "0.8.0"
+#bevy_webgl2 = "0.5.2"
+bevy-inspector-egui = { version = "0.8.2", optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+winit = { version = "0.26.0", features=["x11"]}
+
+[build-dependencies]
+embed-resource = "1.4"
