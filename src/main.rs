@@ -4,6 +4,8 @@ use bevy::prelude::*;
 use bevy_inspector_egui::WorldInspectorPlugin;
 
 mod utils;
+mod camera;
+mod physics;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 enum GameState {
@@ -23,6 +25,8 @@ fn main() {
     })
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .add_plugins(DefaultPlugins)
+    .add_plugin(physics::AppPhysicsPlugin)
+    .add_plugin(camera::CameraPlugin)
     .add_state(GameState::Playing)
     .add_system(bevy::input::system::exit_on_esc_system);
 
