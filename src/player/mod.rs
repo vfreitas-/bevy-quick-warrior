@@ -13,6 +13,10 @@ impl Plugin for PlayerPlugin {
         SystemSet::on_update(GameState::Running)
           .with_system(player_input)
           .with_system(player_movement)
+      )
+      .add_system_set(
+        SystemSet::on_exit(GameState::Running)
+          .with_system(player_pause)
       );
   }
 }
@@ -99,3 +103,12 @@ fn player_movement(
 // fn player_dash() {}
 
 // fn player_attack () {}
+
+fn player_pause (
+  mut query: Query<(&mut Velocity, &mut PlayerMovement), With<Player>>,
+) {
+  if let Some((mut velocity, mut player_movement)) = query.iter_mut().next() {
+    velocity.linear = Vec3::ZERO;
+    player_movement.velocity = Vec2::ZERO;
+  }
+}

@@ -9,7 +9,14 @@ pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
   fn build(&self, app: &mut App) {
     app
-      .add_system(enemy_follow_player);
+      .add_system_set(
+        SystemSet::on_update(GameState::Running)
+          .with_system(enemy_follow_player)
+      )
+      .add_system_set(
+        SystemSet::on_exit(GameState::Running)
+          .with_system(enemy_pause)
+      );
   }
 }
 
@@ -61,5 +68,13 @@ fn enemy_follow_player (
       let input_velocity = direction * 2000. * time.delta_seconds();
       velocity.linear = Vec3::new(input_velocity.x, input_velocity.y, 1.);
     }
+  }
+}
+
+fn enemy_pause (
+  mut query: Query<&mut Velocity, With<Enemy>>,
+) {
+  for mut velocity in query.iter_mut() {
+    velocity.linear = Vec3::ZERO;
   }
 }
