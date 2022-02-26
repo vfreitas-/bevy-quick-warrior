@@ -1,4 +1,4 @@
-use bevy::{prelude::*, core::FixedTimestep};
+use bevy::prelude::*;
 
 use crate::GameState;
 

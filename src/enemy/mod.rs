@@ -23,12 +23,6 @@ impl Plugin for EnemyPlugin {
 #[derive(Component)]
 pub struct Enemy;
 
-//TODO: merge it with PlayerMovement
-#[derive(Component, Default)]
-pub struct EnemyMovement {
-  velocity: Vec2,
-}
-
 pub fn enemy_spawn(
   commands: &mut Commands,
   transform: Transform,

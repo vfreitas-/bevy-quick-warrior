@@ -113,7 +113,7 @@ fn ui_player_spawn (
 
 fn button_system(
   mut interaction_query: Query<
-    (&Interaction),
+    &Interaction,
     (Changed<Interaction>, With<UIEventBtn>),
   >,
   mut event_writer: EventWriter<OnQuickEvent>,
