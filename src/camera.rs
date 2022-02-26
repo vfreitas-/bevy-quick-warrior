@@ -12,6 +12,9 @@ impl Plugin for CameraPlugin {
   }
 }
 
+#[derive(Component)]
+pub struct MainCamera;
+
 fn camera_setup(mut commands: Commands, mut windows: ResMut<Windows>) {
   let mut camera = OrthographicCameraBundle::new_2d();
   camera.orthographic_projection = OrthographicProjection {
@@ -25,7 +28,9 @@ fn camera_setup(mut commands: Commands, mut windows: ResMut<Windows>) {
     scale: 1.,
     ..Default::default()
   };
-  commands.spawn_bundle(camera);
+  commands
+    .spawn_bundle(camera)
+    .insert(MainCamera);
 
   #[cfg(all(feature = "debug"))]
   let window = windows.get_primary_mut().unwrap();
