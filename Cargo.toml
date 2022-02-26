@@ -41,7 +41,6 @@ heron = "2.0.1"
 bevy_ecs_tilemap = "0.5.0"
 benimator = "2.0.1"
 bevy_kira_audio = "0.8.0"
-#bevy_webgl2 = "0.5.2"
 bevy-inspector-egui = { version = "0.8.2", optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
