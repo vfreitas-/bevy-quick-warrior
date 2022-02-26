@@ -9,6 +9,7 @@ mod physics;
 mod player;
 mod enemy;
 mod level;
+mod quick_event;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -39,6 +40,7 @@ fn main() {
     .add_plugin(camera::CameraPlugin)
     .add_plugin(player::PlayerPlugin)
     .add_plugin(enemy::EnemyPlugin)
+    .add_plugin(quick_event::QuickEventPlugin)
     .add_system(bevy::input::system::exit_on_esc_system);
 
   #[cfg(all(feature = "debug"))]

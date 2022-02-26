@@ -4,6 +4,8 @@ mod spawner;
 
 use spawner::*;
 
+use crate::GameState;
+
 pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
@@ -12,7 +14,7 @@ impl Plugin for LevelPlugin {
       .init_resource::<SpawnData>()
       .add_startup_system(level_startup)
       .add_system_set(
-        SystemSet::new()
+        SystemSet::on_update(GameState::Running)
           .with_run_criteria(FixedTimestep::step(6.))
           .with_system(spawn_enemies)
       );
