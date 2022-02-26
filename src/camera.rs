@@ -7,7 +7,8 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
   fn build(&self, app: &mut App) {
-    app.add_startup_system(camera_setup);
+    app
+      .add_startup_system(camera_setup);
   }
 }
 
@@ -16,8 +17,8 @@ fn camera_setup(mut commands: Commands, mut windows: ResMut<Windows>) {
   camera.orthographic_projection = OrthographicProjection {
     left: -320.,
     right: 320.,
-    top: 180.,
-    bottom: -180.,
+    top: 240.,
+    bottom: -240.,
     depth_calculation: DepthCalculation::ZDifference,
     scaling_mode: ScalingMode::None,
     window_origin: WindowOrigin::Center,
@@ -29,5 +30,5 @@ fn camera_setup(mut commands: Commands, mut windows: ResMut<Windows>) {
   #[cfg(all(feature = "debug"))]
   let window = windows.get_primary_mut().unwrap();
   #[cfg(all(feature = "debug"))]
-  window.set_position(IVec2::new(1750, 200));
+  window.set_position(IVec2::new(1550, 200));
 }
