@@ -25,7 +25,7 @@ pub fn spawn_enemies(
   let mut rng = rand::thread_rng();
   let max = rng.gen_range(0..spawn_data.max_enemies);
 
-  for n in 0..max {
+  for _ in 0..max {
     let x = rng.gen_range(-320.0..320.0);
     let y = rng.gen_range(-240.0..240.0);
 

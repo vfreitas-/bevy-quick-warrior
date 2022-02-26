@@ -4,7 +4,7 @@ const CMP_EPSILON: f32 = 0.000001;
 
 #[allow(dead_code)]
 pub fn direction_to(current: Vec2, to: Vec2) -> Vec2 {
-  return Vec2::new(current.x - to.x, current.y - to.y).normalize();
+  return Vec2::new(to.x - current.x, to.y - current.y).normalize();
 }
 
 #[allow(dead_code)]

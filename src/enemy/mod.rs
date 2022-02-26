@@ -1,4 +1,6 @@
-use crate::{GameState};
+use crate::{GameState, player::Player};
+use crate::utils::vec2::*;
+use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
 use heron::*;
 
@@ -6,8 +8,8 @@ pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
   fn build(&self, app: &mut App) {
-    // app
-    //   .add_startup_system(enemy_setup);
+    app
+      .add_system(enemy_follow_player);
   }
 }
 
@@ -40,4 +42,24 @@ pub fn enemy_spawn(
   .insert(Velocity::from_linear(Vec3::ZERO))
   .insert(Acceleration::from_linear(Vec3::ZERO))
   .insert(Enemy);
+}
+
+fn enemy_follow_player (
+  time: Res<Time>,
+  mut query: Query<&mut Transform, (With<Player>, Without<Enemy>)>,
+  mut q2: Query<(&mut Velocity, &Transform), (With<Enemy>, Without<Player>)>,
+) {
+
+  if let Some(player_transform) = query.iter_mut().next() {
+    for (mut velocity, transform) in q2.iter_mut() {
+
+      let direction = direction_to(
+        transform.translation.xy(),
+        player_transform.translation.xy()
+      );
+
+      let input_velocity = direction * 2000. * time.delta_seconds();
+      velocity.linear = Vec3::new(input_velocity.x, input_velocity.y, 1.);
+    }
+  }
 }

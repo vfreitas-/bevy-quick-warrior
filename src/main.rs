@@ -38,6 +38,7 @@ fn main() {
     .add_plugin(level::LevelPlugin)
     .add_plugin(camera::CameraPlugin)
     .add_plugin(player::PlayerPlugin)
+    .add_plugin(enemy::EnemyPlugin)
     .add_system(bevy::input::system::exit_on_esc_system);
 
   #[cfg(all(feature = "debug"))]
