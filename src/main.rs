@@ -7,7 +7,8 @@ mod utils;
 mod camera;
 mod physics;
 mod player;
-mod map;
+mod enemy;
+mod level;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -34,7 +35,7 @@ fn main() {
     .add_plugins(DefaultPlugins)
     .add_state(GameState::Running)
     .add_plugin(physics::AppPhysicsPlugin)
-    .add_plugin(map::MapPlugin)
+    .add_plugin(level::LevelPlugin)
     .add_plugin(camera::CameraPlugin)
     .add_plugin(player::PlayerPlugin)
     .add_system(bevy::input::system::exit_on_esc_system);

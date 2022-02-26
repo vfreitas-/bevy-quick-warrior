@@ -1,5 +1,4 @@
 use crate::{GameState};
-use benimator::*;
 use bevy::prelude::*;
 use heron::*;
 
@@ -38,14 +37,13 @@ fn player_setup(
   commands.spawn_bundle(
     SpriteBundle {
       sprite: Sprite {
-        color: Color::WHITE,
+        color: Color::hex("68aca9").unwrap(),
         custom_size: Some(Vec2::new(16., 16.)),
         ..Default::default()
       },
       ..Default::default()
     }
   )
-  .insert(Play)
   .insert(RigidBody::KinematicVelocityBased)
   .insert(CollisionShape::Sphere { radius: 0.75 })
   .insert(Velocity::from_linear(Vec3::ZERO))
