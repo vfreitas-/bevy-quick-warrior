@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use rand::prelude::*;
 use crate::enemy::*;
 
-
 #[derive(Debug, PartialEq)]
 pub struct SpawnData {
   wave: i32,
@@ -56,5 +55,4 @@ pub fn spawn_enemies_constant(
   spawn_data.wave += 1;
   spawn_data.min_enemies = (spawn_data.wave / 4) as usize + 1;
   spawn_data.max_enemies = (spawn_data.wave / 2) as usize + 3;
-  println!("min: {:?}; max: {:?}", spawn_data.min_enemies, spawn_data.max_enemies);
 }
