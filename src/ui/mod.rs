@@ -23,6 +23,10 @@ impl Plugin for UIPlugin {
           .with_system(ui_quick_event_spawn)
       )
       .add_system_set(
+        SystemSet::on_update(GameState::TimedEvent)
+          .with_system(ui_update_event_count)
+      )
+      .add_system_set(
         SystemSet::on_exit(GameState::TimedEvent)
           .with_system(ui_quick_event_despawn)
       );

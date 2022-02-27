@@ -1,9 +1,14 @@
 use bevy::prelude::*;
 
+use crate::quick_event::QuickEventData;
+
 use super::UIRootNode;
 
 #[derive(Component)]
 pub struct UIQuickEventPopup;
+
+#[derive(Component)]
+pub struct UIQuickEventPlayerCount;
 
 pub fn ui_quick_event_spawn (
   asset_server: Res<AssetServer>,
@@ -143,6 +148,8 @@ pub fn ui_quick_event_spawn (
                 }
               )
               .with_children(|parent| {
+
+                // Column Name
                 parent.spawn_bundle(
                   TextBundle {
                     style: Style {
@@ -167,10 +174,34 @@ pub fn ui_quick_event_spawn (
 
                 parent.spawn_bundle(
                   ImageBundle {
+                    style: Style {
+                      margin: Rect {
+                        bottom: Val::Px(24.),
+                        ..Default::default()
+                      },
+                      ..Default::default()
+                    },
                     image: UiImage(asset_server.load("Art/UI/keybinds.png")),
                     ..Default::default()
                   }
                 );
+
+                parent.spawn_bundle(
+                  TextBundle {
+                    text: Text::with_section(
+                      "00",
+                      TextStyle {
+                        font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                        font_size: 32.0,
+                        color: Color::WHITE, 
+                      },
+                      Default::default()
+                    ),
+                    ..Default::default()
+                  }
+                )
+                .insert(UIQuickEventPlayerCount);
+
               });
 
               // Enemy Column
@@ -222,6 +253,15 @@ pub fn ui_quick_event_spawn (
           });
         });
       }); // 
+  }
+}
+
+pub fn ui_update_event_count (
+  quick_event_data: Res<QuickEventData>,
+  mut query: Query<&mut Text, With<UIQuickEventPlayerCount>>
+) {
+  for mut text in query.iter_mut() {
+    text.sections[0].value = format!("Press {:?} - {:02} times", quick_event_data.key, quick_event_data.count);
   }
 }
 
