@@ -1,1 +1,4 @@
 tab_spaces = 2
+attr_fn_like_width = 50
+chain_width = 50
+fn_call_width = 50
