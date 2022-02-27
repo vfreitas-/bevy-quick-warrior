@@ -12,7 +12,6 @@ pub struct UIQuickEventPlayerCount;
 
 pub fn ui_quick_event_spawn (
   asset_server: Res<AssetServer>,
-  mut materials: ResMut<Assets<ColorMaterial>>,
   mut commands: Commands,
   mut query: Query<Entity, With<UIRootNode>>,
 ) {

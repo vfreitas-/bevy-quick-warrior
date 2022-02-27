@@ -79,7 +79,6 @@ fn quick_event_input (
   keyboard_input: Res<Input<KeyCode>>,
   mut quick_event_data: ResMut<QuickEventData>,
   mut state: ResMut<State<GameState>>,
-  mut commands: Commands,
 ) {
 
   if keyboard_input.just_pressed(quick_event_data.key) {

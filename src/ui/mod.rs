@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{GameState, quick_event::OnQuickEvent};
+use crate::{GameState, quick_event::OnQuickEvent, utils::ecs::should_run};
 
 mod quick_event;
 use quick_event::*;
@@ -12,6 +12,7 @@ impl Plugin for UIPlugin {
       .add_startup_system(ui_setup)
       .add_system_set(
         SystemSet::on_enter(GameState::Running)
+          .with_run_criteria(should_run::<UIPlayerHUD>)
           .with_system(ui_player_spawn)
       )
       .add_system_set(
@@ -35,6 +36,9 @@ impl Plugin for UIPlugin {
 
 #[derive(Component)]
 pub struct UIRootNode;
+
+#[derive(Component)]
+pub struct UIPlayerHUD;
 
 #[derive(Component)]
 pub struct UIEventBtn;
@@ -81,6 +85,7 @@ fn ui_player_spawn (
             ..Default::default()
           }
         )
+        .insert(UIPlayerHUD)
         .with_children(|parent| {
           parent.spawn_bundle(
             ButtonBundle {
@@ -91,7 +96,7 @@ fn ui_player_spawn (
                 align_items: AlignItems::Center,
                 ..Default::default()
               },
-              color: Color::ALICE_BLUE.into(),
+              color: Color::DARK_GRAY.into(),
               ..Default::default()
             }
           )
