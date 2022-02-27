@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use rand::prelude::*;
 
@@ -21,8 +23,10 @@ pub struct QuickEventPlugin;
 impl Plugin for QuickEventPlugin {
   fn build(&self, app: &mut App) {
     app
+      .init_resource::<QuickEvent>()
       .init_resource::<QuickEventData>()
       .add_event::<OnQuickEvent>()
+      .add_event::<OnQuickEventEnd>()
       .add_system_set(
         SystemSet::on_update(GameState::Running)
           .with_system(quick_event_listener)
@@ -32,6 +36,10 @@ impl Plugin for QuickEventPlugin {
           .with_system(quick_event_input)
       )
       .add_system_set(
+        SystemSet::on_update(GameState::TimedEvent)
+          .with_system(quick_event_time_track)
+      )
+      .add_system_set(
         SystemSet::on_exit(GameState::TimedEvent)
           .with_system(quick_event_on_exit)
       );
@@ -39,12 +47,27 @@ impl Plugin for QuickEventPlugin {
 }
 
 pub struct OnQuickEvent;
+pub struct OnQuickEventEnd;
+
+#[derive(Debug, Clone)]
+pub struct QuickEvent {
+  duration: f32,
+}
+
+impl Default for QuickEvent {
+    fn default () -> Self {
+      Self {
+        duration: 5.
+      }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct QuickEventData {
   pub index: IVec2,
   pub key: KeyCode,
   pub count: usize,
+  pub time_passed: f32,
 }
 
 impl Default for QuickEventData {
@@ -53,6 +76,7 @@ impl Default for QuickEventData {
         index: IVec2::ZERO,
         key: KeyCode::A,
         count: 0,
+        time_passed: 0.0,
       }
     }
 }
@@ -71,6 +95,25 @@ fn quick_event_listener (
       quick_event_data.key = KEYBINDS[x as usize][y as usize];
 
       state.set(GameState::TimedEvent).unwrap();
+    }
+  }
+}
+
+fn quick_event_time_track (
+  time: Res<Time>,
+  quick_event: Res<QuickEvent>,
+  mut quick_event_data: ResMut<QuickEventData>,
+  mut event_writer: EventWriter<OnQuickEventEnd>,
+  mut state: ResMut<State<GameState>>,
+) {
+  quick_event_data.time_passed += time.delta_seconds();
+  println!("Time Passed: {:?}", quick_event_data.time_passed);
+
+  if quick_event_data.time_passed >=quick_event.duration {
+    event_writer.send(OnQuickEventEnd);
+
+    if &GameState::TimedEvent == state.current() {
+      state.set(GameState::Running).unwrap();
     }
   }
 }
