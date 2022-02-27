@@ -12,14 +12,10 @@ pub struct UIQuickEventPlayerCount;
 
 pub fn ui_quick_event_spawn (
   asset_server: Res<AssetServer>,
+  mut texture_atlases: ResMut<Assets<TextureAtlas>>,
   mut commands: Commands,
   mut query: Query<Entity, With<UIRootNode>>,
 ) {
-  // let sprite = SpriteSheetBundle {
-  //   texture_atlas: 
-  //   ..Default::default()
-  // };
-
 
   if let Some(root) = query.iter_mut().next() {
     commands.entity(root)
@@ -239,12 +235,35 @@ pub fn ui_quick_event_spawn (
                   }
                 );
 
+                // let texture_handle = asset_server.load("Art/UI/keybinds.png");
+                // let texture_atlas = TextureAtlas::from_grid(
+                //   texture_handle, 
+                //   Vec2::new(16.0, 16.0), 
+                //   9, 
+                //   4
+                // );
+
+                // let texture_atlas_handle = texture_atlases.add(texture_atlas);
+
                 parent.spawn_bundle(
+                  // SpriteSheetBundle {
+                  //   texture_atlas: texture_atlas_handle,
+                  //   sprite: TextureAtlasSprite {
+                  //     index: 1,
+                  //     ..Default::default()
+                  //   },
+                  //   ..Default::default()
+                  // }
                   ImageBundle {
                     image: UiImage(asset_server.load("Art/UI/keybinds.png")),
+                    // image: UiImage(texture_atlas_handle.),
                     ..Default::default()
                   }
                 );
+                // .insert(Style::default())
+                // .insert(CalculatedSize{size:Size::new(30.0, 30.0)})
+                // .insert(Node::default())
+                // .insert(Style::default());
               });
 
               
