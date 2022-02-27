@@ -272,10 +272,22 @@ pub fn ui_quick_event_spawn (
 
 pub fn ui_update_event_count (
   quick_event_data: Res<QuickEventData>,
-  mut query: Query<&mut Text, With<UIQuickEventPlayerCount>>
+  mut query_player: Query<&mut Text, (With<UIQuickEventPlayerCount>, Without<UIQuickEventEnemyCount>)>,
+  mut query_enemy: Query<&mut Text, (With<UIQuickEventEnemyCount>, Without<UIQuickEventPlayerCount>)>
 ) {
-  for mut text in query.iter_mut() {
-    text.sections[0].value = format!("Press {:?} - {:02} times", quick_event_data.keybind.label, quick_event_data.count);
+  for mut text in query_player.iter_mut() {
+    text.sections[0].value = format!(
+      "Press {:?} - {:02} times",
+      quick_event_data.keybind.label,
+      quick_event_data.player_count
+    );
+  }
+
+  for mut text in query_enemy.iter_mut() {
+    text.sections[0].value = format!(
+      "{:02}",
+      quick_event_data.enemy_count
+    );
   }
 }
 

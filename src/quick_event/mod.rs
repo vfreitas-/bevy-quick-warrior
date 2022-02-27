@@ -92,7 +92,7 @@ impl Default for QuickEvent {
     fn default () -> Self {
       Self {
         duration: 5.,
-        enemy_speed: 4.,
+        enemy_speed: 1.,
       }
     }
 }
@@ -100,7 +100,8 @@ impl Default for QuickEvent {
 #[derive(Debug, Clone)]
 pub struct QuickEventData {
   pub keybind: KeyBind,
-  pub count: usize,
+  pub player_count: usize,
+  pub enemy_count: usize,
   pub time_passed: f32,
 }
 
@@ -108,7 +109,8 @@ impl Default for QuickEventData {
     fn default () -> Self {
       Self {
         keybind: KEYBINDS[0].clone(),
-        count: 0,
+        player_count: 0,
+        enemy_count: 0,
         time_passed: 0.0,
       }
     }
@@ -139,7 +141,6 @@ fn quick_event_time_track (
   mut state: ResMut<State<GameState>>,
 ) {
   quick_event_data.time_passed += time.delta_seconds();
-  println!("Time Passed: {:?}", quick_event_data.time_passed);
 
   if quick_event_data.time_passed >=quick_event.duration {
     event_writer.send(OnQuickEventEnd);
@@ -156,10 +157,11 @@ fn quick_event_input (
   mut quick_event_data: ResMut<QuickEventData>,
   mut state: ResMut<State<GameState>>,
 ) {
-  
+  let enemy_interval = quick_event.enemy_speed / quick_event.duration;
+  quick_event_data.enemy_count = (quick_event_data.time_passed / enemy_interval).floor() as usize;
 
   if keyboard_input.just_pressed(quick_event_data.keybind.key) {
-    quick_event_data.count += 1;
+    quick_event_data.player_count += 1;
   }
 
   if keyboard_input.just_pressed(KeyCode::Tab) {
