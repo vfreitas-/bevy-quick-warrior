@@ -1,3 +1,4 @@
+use crate::physics::Layer;
 use crate::{GameState, player::Player};
 use crate::utils::vec2::*;
 use bevy::math::Vec3Swizzles;
@@ -38,10 +39,15 @@ pub fn enemy_spawn(
       ..Default::default()
     }
   )
-  .insert(RigidBody::KinematicVelocityBased)
-  .insert(CollisionShape::Sphere { radius: 0.75 })
+  .insert(RigidBody::Dynamic)
+  .insert(CollisionShape::Sphere { radius: 12. })
   .insert(Velocity::from_linear(Vec3::ZERO))
   .insert(Acceleration::from_linear(Vec3::ZERO))
+  .insert(RotationConstraints::lock())
+  .insert(CollisionLayers::none()
+    .with_group(Layer::Enemy)
+    .with_masks(&[Layer::World, Layer::Enemy])
+  )
   .insert(Enemy);
 }
 

@@ -37,7 +37,7 @@ debug = ["bevy-inspector-egui"]
 [dependencies]
 rand = "0.8.3"
 bevy = { version = "0.6", default-features = false }
-heron = "2.0.1"
+heron = { version = "2.0.1", features = ["2d", "debug-2d"] }
 bevy_ecs_tilemap = "0.5.0"
 benimator = "2.0.1"
 bevy_kira_audio = "0.8.0"

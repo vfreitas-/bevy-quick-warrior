@@ -1,4 +1,4 @@
-use bevy::{prelude::*, core::FixedTimestep};
+use bevy::prelude::*;
 
 mod spawner;
 
@@ -14,11 +14,8 @@ impl Plugin for LevelPlugin {
       .init_resource::<SpawnData>()
       .add_startup_system(level_startup)
       .add_system_set(
-        // TODO: fixed timestep with game state not working apparently
-        // change it to a system: time_passed += delta; time_passed >= 6.
         SystemSet::on_update(GameState::Running)
-          .with_run_criteria(FixedTimestep::step(6.))
-          .with_system(spawn_enemies)
+          .with_system(spawn_enemies_constant)
       );
   }
 }
