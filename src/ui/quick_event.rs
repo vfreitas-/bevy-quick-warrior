@@ -19,7 +19,6 @@ pub struct UIQuickEventEnemyCount;
 pub fn ui_quick_event_spawn (
   asset_server: Res<AssetServer>,
   quick_event_data: Res<QuickEventData>,
-  mut texture_atlases: ResMut<Assets<TextureAtlas>>,
   mut commands: Commands,
   mut query: Query<Entity, With<UIRootNode>>,
 ) {
