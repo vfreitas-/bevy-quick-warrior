@@ -8,10 +8,17 @@ use super::UIRootNode;
 pub struct UIQuickEventPopup;
 
 #[derive(Component)]
+pub struct UIQuickEventPlayerKeySprite;
+
+#[derive(Component)]
 pub struct UIQuickEventPlayerCount;
+
+#[derive(Component)]
+pub struct UIQuickEventEnemyCount;
 
 pub fn ui_quick_event_spawn (
   asset_server: Res<AssetServer>,
+  quick_event_data: Res<QuickEventData>,
   mut texture_atlases: ResMut<Assets<TextureAtlas>>,
   mut commands: Commands,
   mut query: Query<Entity, With<UIRootNode>>,
@@ -169,17 +176,19 @@ pub fn ui_quick_event_spawn (
 
                 parent.spawn_bundle(
                   ImageBundle {
+                    image: UiImage(asset_server.load(quick_event_data.keybind.sprite)),
                     style: Style {
+                      size: Size::new(Val::Px(64.0), Val::Px(64.0)),
                       margin: Rect {
                         bottom: Val::Px(24.),
                         ..Default::default()
                       },
                       ..Default::default()
                     },
-                    image: UiImage(asset_server.load("Art/UI/keybinds.png")),
                     ..Default::default()
                   }
-                );
+                )
+                .insert(UIQuickEventPlayerKeySprite);
 
                 parent.spawn_bundle(
                   TextBundle {
@@ -213,6 +222,8 @@ pub fn ui_quick_event_spawn (
                 }
               )
               .with_children(|parent| {
+
+                // Text
                 parent.spawn_bundle(
                   TextBundle {
                     style: Style {
@@ -235,38 +246,23 @@ pub fn ui_quick_event_spawn (
                   }
                 );
 
-                // let texture_handle = asset_server.load("Art/UI/keybinds.png");
-                // let texture_atlas = TextureAtlas::from_grid(
-                //   texture_handle, 
-                //   Vec2::new(16.0, 16.0), 
-                //   9, 
-                //   4
-                // );
-
-                // let texture_atlas_handle = texture_atlases.add(texture_atlas);
-
                 parent.spawn_bundle(
-                  // SpriteSheetBundle {
-                  //   texture_atlas: texture_atlas_handle,
-                  //   sprite: TextureAtlasSprite {
-                  //     index: 1,
-                  //     ..Default::default()
-                  //   },
-                  //   ..Default::default()
-                  // }
-                  ImageBundle {
-                    image: UiImage(asset_server.load("Art/UI/keybinds.png")),
-                    // image: UiImage(texture_atlas_handle.),
+                  TextBundle {
+                    text: Text::with_section(
+                      "00",
+                      TextStyle {
+                        font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                        font_size: 40.0,
+                        color: Color::WHITE, 
+                      },
+                      Default::default()
+                    ),
                     ..Default::default()
                   }
-                );
-                // .insert(Style::default())
-                // .insert(CalculatedSize{size:Size::new(30.0, 30.0)})
-                // .insert(Node::default())
-                // .insert(Style::default());
-              });
+                )
+                .insert(UIQuickEventEnemyCount);
 
-              
+              });
             });
           });
         });
@@ -279,7 +275,7 @@ pub fn ui_update_event_count (
   mut query: Query<&mut Text, With<UIQuickEventPlayerCount>>
 ) {
   for mut text in query.iter_mut() {
-    text.sections[0].value = format!("Press {:?} - {:02} times", quick_event_data.key, quick_event_data.count);
+    text.sections[0].value = format!("Press {:?} - {:02} times", quick_event_data.keybind.label, quick_event_data.count);
   }
 }
 

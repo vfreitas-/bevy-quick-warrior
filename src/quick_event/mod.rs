@@ -1,21 +1,53 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
 use rand::prelude::*;
 
 use crate::GameState;
 
+#[derive(Debug, Clone)]
+pub struct KeyBind {
+  pub key: KeyCode,
+  pub sprite: &'static str,
+  pub label: &'static str,
+}
+
 #[allow(dead_code)]
-const KEYBINDS: [[KeyCode; 4]; 9] = [ 
-  [KeyCode::Key1, KeyCode::Key0, KeyCode::O, KeyCode::K],
-  [KeyCode::Key2, KeyCode::Q, KeyCode::P, KeyCode::L],
-  [KeyCode::Key3, KeyCode::W, KeyCode::A, KeyCode::Z],
-  [KeyCode::Key4, KeyCode::E, KeyCode::S, KeyCode::X],
-  [KeyCode::Key5, KeyCode::R, KeyCode::D, KeyCode::C],
-  [KeyCode::Key6, KeyCode::T, KeyCode::F, KeyCode::V],
-  [KeyCode::Key7, KeyCode::Y, KeyCode::G, KeyCode::B],
-  [KeyCode::Key8, KeyCode::U, KeyCode::H, KeyCode::N],
-  [KeyCode::Key9, KeyCode::I, KeyCode::J, KeyCode::M],
+const KEYBINDS: [KeyBind; 36] = [
+  KeyBind { key: KeyCode::Key0, sprite: "Art/UI/Keybinds/00.png", label: "0" },
+  KeyBind { key: KeyCode::Key1, sprite: "Art/UI/Keybinds/01.png", label: "1" },
+  KeyBind { key: KeyCode::Key2, sprite: "Art/UI/Keybinds/02.png", label: "2" },
+  KeyBind { key: KeyCode::Key3, sprite: "Art/UI/Keybinds/03.png", label: "3" },
+  KeyBind { key: KeyCode::Key4, sprite: "Art/UI/Keybinds/04.png", label: "4" },
+  KeyBind { key: KeyCode::Key5, sprite: "Art/UI/Keybinds/05.png", label: "5" },
+  KeyBind { key: KeyCode::Key6, sprite: "Art/UI/Keybinds/06.png", label: "6" },
+  KeyBind { key: KeyCode::Key7, sprite: "Art/UI/Keybinds/07.png", label: "7" },
+  KeyBind { key: KeyCode::Key8, sprite: "Art/UI/Keybinds/08.png", label: "8" },
+  KeyBind { key: KeyCode::Key9, sprite: "Art/UI/Keybinds/09.png", label: "9" },
+  KeyBind { key: KeyCode::A, sprite: "Art/UI/Keybinds/A.png", label: "A" },
+  KeyBind { key: KeyCode::B, sprite: "Art/UI/Keybinds/B.png", label: "B" },
+  KeyBind { key: KeyCode::C, sprite: "Art/UI/Keybinds/C.png", label: "C" },
+  KeyBind { key: KeyCode::D, sprite: "Art/UI/Keybinds/D.png", label: "D" },
+  KeyBind { key: KeyCode::E, sprite: "Art/UI/Keybinds/E.png", label: "E" },
+  KeyBind { key: KeyCode::F, sprite: "Art/UI/Keybinds/F.png", label: "F" },
+  KeyBind { key: KeyCode::G, sprite: "Art/UI/Keybinds/G.png", label: "G" },
+  KeyBind { key: KeyCode::H, sprite: "Art/UI/Keybinds/H.png", label: "H" },
+  KeyBind { key: KeyCode::I, sprite: "Art/UI/Keybinds/I.png", label: "I" },
+  KeyBind { key: KeyCode::J, sprite: "Art/UI/Keybinds/J.png", label: "J" },
+  KeyBind { key: KeyCode::K, sprite: "Art/UI/Keybinds/K.png", label: "K" },
+  KeyBind { key: KeyCode::L, sprite: "Art/UI/Keybinds/L.png", label: "L" },
+  KeyBind { key: KeyCode::M, sprite: "Art/UI/Keybinds/M.png", label: "M" },
+  KeyBind { key: KeyCode::N, sprite: "Art/UI/Keybinds/N.png", label: "N" },
+  KeyBind { key: KeyCode::O, sprite: "Art/UI/Keybinds/O.png", label: "O" },
+  KeyBind { key: KeyCode::P, sprite: "Art/UI/Keybinds/P.png", label: "P" },
+  KeyBind { key: KeyCode::Q, sprite: "Art/UI/Keybinds/Q.png", label: "Q" },
+  KeyBind { key: KeyCode::R, sprite: "Art/UI/Keybinds/R.png", label: "R" },
+  KeyBind { key: KeyCode::S, sprite: "Art/UI/Keybinds/S.png", label: "S" },
+  KeyBind { key: KeyCode::T, sprite: "Art/UI/Keybinds/T.png", label: "T" },
+  KeyBind { key: KeyCode::U, sprite: "Art/UI/Keybinds/U.png", label: "U" },
+  KeyBind { key: KeyCode::V, sprite: "Art/UI/Keybinds/V.png", label: "V" },
+  KeyBind { key: KeyCode::W, sprite: "Art/UI/Keybinds/W.png", label: "W" },
+  KeyBind { key: KeyCode::X, sprite: "Art/UI/Keybinds/X.png", label: "X" },
+  KeyBind { key: KeyCode::Y, sprite: "Art/UI/Keybinds/Y.png", label: "Y" },
+  KeyBind { key: KeyCode::Z, sprite: "Art/UI/Keybinds/Z.png", label: "Z" },
 ];
 
 pub struct QuickEventPlugin;
@@ -52,20 +84,22 @@ pub struct OnQuickEventEnd;
 #[derive(Debug, Clone)]
 pub struct QuickEvent {
   duration: f32,
+  // Keys pressed per second
+  enemy_speed: f32,
 }
 
 impl Default for QuickEvent {
     fn default () -> Self {
       Self {
-        duration: 5.
+        duration: 5.,
+        enemy_speed: 4.,
       }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct QuickEventData {
-  pub index: IVec2,
-  pub key: KeyCode,
+  pub keybind: KeyBind,
   pub count: usize,
   pub time_passed: f32,
 }
@@ -73,8 +107,7 @@ pub struct QuickEventData {
 impl Default for QuickEventData {
     fn default () -> Self {
       Self {
-        index: IVec2::ZERO,
-        key: KeyCode::A,
+        keybind: KEYBINDS[0].clone(),
         count: 0,
         time_passed: 0.0,
       }
@@ -89,10 +122,9 @@ fn quick_event_listener (
   for _ in events.iter() {
     if &GameState::Running == state.current() {
       let mut rng = rand::thread_rng();
-      let x = rng.gen_range(0..8);
-      let y = rng.gen_range(0..3);
-      quick_event_data.index = IVec2::new(x, y);
-      quick_event_data.key = KEYBINDS[x as usize][y as usize];
+      let index = rng.gen_range(0..35);
+
+      quick_event_data.keybind = KEYBINDS[index as usize].clone();
 
       state.set(GameState::TimedEvent).unwrap();
     }
@@ -120,11 +152,13 @@ fn quick_event_time_track (
 
 fn quick_event_input (
   keyboard_input: Res<Input<KeyCode>>,
+  quick_event: Res<QuickEvent>,
   mut quick_event_data: ResMut<QuickEventData>,
   mut state: ResMut<State<GameState>>,
 ) {
+  
 
-  if keyboard_input.just_pressed(quick_event_data.key) {
+  if keyboard_input.just_pressed(quick_event_data.keybind.key) {
     quick_event_data.count += 1;
   }
 
