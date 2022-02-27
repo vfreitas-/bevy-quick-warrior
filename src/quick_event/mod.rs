@@ -30,6 +30,10 @@ impl Plugin for QuickEventPlugin {
       .add_system_set(
         SystemSet::on_update(GameState::TimedEvent)
           .with_system(quick_event_input)
+      )
+      .add_system_set(
+        SystemSet::on_exit(GameState::TimedEvent)
+          .with_system(quick_event_on_exit)
       );
   }
 }
@@ -88,4 +92,10 @@ fn quick_event_input (
     }
   }
 
+}
+
+fn quick_event_on_exit (
+  mut commands: Commands,
+) {
+  commands.insert_resource(QuickEventData::default());
 }
