@@ -89,12 +89,12 @@ pub struct QuickEvent {
 }
 
 impl Default for QuickEvent {
-    fn default () -> Self {
-      Self {
-        duration: 5.,
-        enemy_speed: 1.,
-      }
+  fn default () -> Self {
+    Self {
+      duration: 5.,
+      enemy_speed: 1.,
     }
+  }
 }
 
 #[derive(Debug, Clone)]
@@ -106,14 +106,14 @@ pub struct QuickEventData {
 }
 
 impl Default for QuickEventData {
-    fn default () -> Self {
-      Self {
-        keybind: KEYBINDS[0].clone(),
-        player_count: 0,
-        enemy_count: 0,
-        time_passed: 0.0,
-      }
+  fn default () -> Self {
+    Self {
+      keybind: KEYBINDS[0].clone(),
+      player_count: 0,
+      enemy_count: 0,
+      time_passed: 0.0,
     }
+  }
 }
 
 fn quick_event_listener (
