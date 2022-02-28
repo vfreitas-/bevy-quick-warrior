@@ -1,4 +1,4 @@
-use crate::{GameState, physics::Layer};
+use crate::{GameState, physics::Layer, character::Health};
 use benimator::*;
 use bevy::prelude::*;
 use heron::*;
@@ -88,6 +88,7 @@ fn player_setup(
     .with_group(Layer::Player)
     .with_masks(&[Layer::World, Layer::Enemy])
   )
+  .insert(Health::from_health(5))
   .with_children(|parent| {
 
     parent.spawn_bundle(SpriteSheetBundle {
