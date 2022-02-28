@@ -8,6 +8,7 @@ mod camera;
 mod physics;
 mod player;
 mod enemy;
+mod character;
 mod level;
 mod quick_event;
 mod ui;
@@ -39,6 +40,7 @@ fn main() {
     .add_plugin(physics::AppPhysicsPlugin)
     .add_plugin(level::LevelPlugin)
     .add_plugin(camera::CameraPlugin)
+    .add_plugin(character::CharacterPlugin)
     .add_plugin(player::PlayerPlugin)
     .add_plugin(enemy::EnemyPlugin)
     .add_plugin(quick_event::QuickEventPlugin)

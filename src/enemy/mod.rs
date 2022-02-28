@@ -46,7 +46,7 @@ pub fn enemy_spawn(
   .insert(RotationConstraints::lock())
   .insert(CollisionLayers::none()
     .with_group(Layer::Enemy)
-    .with_masks(&[Layer::World, Layer::Enemy])
+    .with_masks(&[Layer::World, Layer::Enemy, Layer::Player, Layer::PlayerHitbox])
   )
   .insert(Enemy);
 }
