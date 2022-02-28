@@ -79,7 +79,7 @@ fn player_setup(
     }
   )
   .insert(RigidBody::KinematicVelocityBased)
-  .insert(CollisionShape::Sphere { radius: 1. })
+  .insert(CollisionShape::Sphere { radius: 7. })
   .insert(Velocity::from_linear(Vec3::ZERO))
   .insert(Acceleration::from_linear(Vec3::ZERO))
   .insert(Player::default())
@@ -173,12 +173,14 @@ fn player_movement(
 
       if player_movement.velocity.x > 0. {
         hitbox_transform.translation = Vec3::new(16., 0., 1.);
+        hitbox_transform.rotation = Quat::from_rotation_z(-1.58);
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(7., 10., 1.),
           border_radius: None,
         };
       } else if player_movement.velocity.x < 0. {
         hitbox_transform.translation = Vec3::new(-16., 0., 1.);
+        hitbox_transform.rotation = Quat::from_rotation_z(1.58);
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(7., 10., 1.),
           border_radius: None,
