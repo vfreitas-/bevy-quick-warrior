@@ -1,12 +1,22 @@
 use crate::{GameState, physics::Layer};
+use benimator::*;
 use bevy::prelude::*;
 use heron::*;
+
+use animations::*;
+
+mod animations;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
   fn build(&self, app: &mut App) {
     app
+      .init_resource::<PlayerAnimations>()
+      .add_startup_system_to_stage(
+        StartupStage::PreStartup, 
+        create_animations
+      )
       .add_startup_system(player_setup)
       .add_system_set(
         // TODO: improve order with labels
@@ -31,7 +41,7 @@ pub struct Player {
 impl Default for Player {
   fn default () -> Self {
     Self {
-      attack_duration: 0.3,
+      attack_duration: 0.4,
     }
   }
 }
@@ -54,6 +64,9 @@ pub struct PlayerHitbox;
 
 fn player_setup(
   mut commands: Commands,
+  asset_server: Res<AssetServer>,
+  animations: Res<PlayerAnimations>,
+  mut textures: ResMut<Assets<TextureAtlas>>,
 ) {
   commands.spawn_bundle(
     SpriteBundle {
@@ -76,20 +89,31 @@ fn player_setup(
     .with_masks(&[Layer::World, Layer::Enemy])
   )
   .with_children(|parent| {
-    parent.spawn_bundle(
-      (
-        SensorShape,
-        CollisionShape::Cuboid { 
-          half_extends: Vec3::new(7., 10., 1.),
-          border_radius: None,
-        },
-        Transform {
-          translation: Vec3::new(-12., 0., 1.),
-          ..Default::default()
-        },
-        GlobalTransform::default(),
-      )
-    )
+
+    parent.spawn_bundle(SpriteSheetBundle {
+      texture_atlas: textures.add(
+        TextureAtlas::from_grid(
+          asset_server.load("Art/Character/Attack.png"),
+          Vec2::new(16., 16.),
+          4,
+          1
+        )
+      ),
+      visibility: Visibility {
+        is_visible: false
+      },
+      transform: Transform {
+        translation: Vec3::new(0., 16., 1.),
+        ..Default::default()
+      },
+      ..Default::default()
+    })
+    .insert(animations.attack.clone())
+    .insert(SensorShape)
+    .insert(CollisionShape::Cuboid { 
+      half_extends: Vec3::new(10., 7., 1.),
+      border_radius: None,
+    })
     .insert(CollisionLayers::none()
       .with_masks(&[Layer::Enemy])
     )
@@ -148,25 +172,25 @@ fn player_movement(
     if let Some((mut hitbox_transform, mut shape)) = query_hitbox.iter_mut().next() {
 
       if player_movement.velocity.x > 0. {
-        hitbox_transform.translation = Vec3::new(12., 0., 1.);
+        hitbox_transform.translation = Vec3::new(16., 0., 1.);
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(7., 10., 1.),
           border_radius: None,
         };
       } else if player_movement.velocity.x < 0. {
-        hitbox_transform.translation = Vec3::new(-12., 0., 1.);
+        hitbox_transform.translation = Vec3::new(-16., 0., 1.);
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(7., 10., 1.),
           border_radius: None,
         };
       } else if player_movement.velocity.y > 0. {
-        hitbox_transform.translation = Vec3::new(0., 12., 1.);
+        hitbox_transform.translation = Vec3::new(0., 16., 1.);
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(10., 7., 1.),
           border_radius: None,
         };
       } else if player_movement.velocity.y < 0. {
-        hitbox_transform.translation = Vec3::new(0., -12., 1.);
+        hitbox_transform.translation = Vec3::new(0., -16., 1.);
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(10., 7., 1.),
           border_radius: None,
@@ -183,17 +207,16 @@ fn player_movement(
 
 fn player_attack_added (
   mut commands: Commands,
-  mut query_added: Query<
-    (&mut PlayerAttack, &Children),
-    (Added<PlayerAttack>, With<Player>)
-  >,
-  mut query_player_hitbox: Query<&mut CollisionLayers, With<PlayerHitbox>>,
+  query_added: Query<&mut PlayerAttack, (Added<PlayerAttack>, With<Player>)>,
+  mut query_player_hitbox: Query<(Entity, &mut CollisionLayers, &mut Visibility), With<PlayerHitbox>>,
 ) {
-  if let Some((
-    mut player_attack,
-    children)
-  ) = query_added.iter().next() {
-    for mut collision_layers in query_player_hitbox.iter_mut() {
+  if let Some(_) = query_added.iter().next() {
+    for (entity, mut collision_layers, mut visibility) in query_player_hitbox.iter_mut() {
+      commands.entity(entity)
+        .insert(Play);
+      
+      visibility.is_visible = true;
+
       *collision_layers = collision_layers.with_group(Layer::PlayerHitbox);
     }
   }
@@ -203,16 +226,18 @@ fn player_attacking (
   time: Res<Time>,
   mut commands: Commands,
   mut query: Query<(Entity, &Player, &mut PlayerAttack), With<Player>>,
-  mut query_player_hitbox: Query<&mut CollisionLayers, With<PlayerHitbox>>,
+  mut query_player_hitbox: Query<(&mut CollisionLayers, &mut Visibility), With<PlayerHitbox>>,
 ) {
   for (entity, player, mut player_attack) in query.iter_mut() {
     player_attack.time_passed += time.delta_seconds();
-    println!("time: {:?}", player_attack.time_passed);
+
     if player_attack.time_passed >= player.attack_duration {
       
       commands.entity(entity).remove::<PlayerAttack>();
 
-      for mut collision_layers in query_player_hitbox.iter_mut() {
+      for (mut collision_layers, mut visibility) in query_player_hitbox.iter_mut() {
+        visibility.is_visible = false;
+
         *collision_layers = CollisionLayers::none()
           .with_masks(&[Layer::Enemy]);
       }

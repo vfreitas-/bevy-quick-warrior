@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use benimator::*;
 
 #[cfg(all(feature = "debug"))]
 use bevy_inspector_egui::WorldInspectorPlugin;
@@ -36,6 +37,7 @@ fn main() {
     })
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .add_plugins(DefaultPlugins)
+    .add_plugin(AnimationPlugin::default())
     .add_state(GameState::Running)
     .add_plugin(physics::AppPhysicsPlugin)
     .add_plugin(level::LevelPlugin)
