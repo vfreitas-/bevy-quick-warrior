@@ -4,6 +4,10 @@ TARGET_DIR = "target/wasm32-unknown-unknown/release/"
 [tasks.watch]
 args = ["watch", "-q", "-c", "-x", "run", "--features", "debug"]
 command = "cargo"
+[tasks.rwatch]
+
+args = ["watch", "-q", "-c", "-x", "run"]
+command = "cargo"
 
 [tasks.release]
 dependencies = ["build-and-bind-wasm", "copy-files-for-release"]
