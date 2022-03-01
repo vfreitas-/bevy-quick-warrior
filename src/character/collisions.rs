@@ -64,8 +64,9 @@ pub fn damage (
     })
     .for_each(|player_entity| {
       if let Ok(mut health) =  health_query.get_mut(player_entity) {
-        health.decrease_health(1);
-        println!("Health: {:?}", health.health);
+        if !health.is_invincible {
+          health.decrease_health(1);
+        }
         if health.health <= 0 {
           println!("Player died!");
         }
