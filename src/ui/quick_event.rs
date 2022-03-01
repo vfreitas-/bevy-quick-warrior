@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::quick_event::QuickEventData;
+use crate::quick_event::*;
 
 use super::UIRootNode;
 
@@ -15,6 +15,21 @@ pub struct UIQuickEventPlayerCount;
 
 #[derive(Component)]
 pub struct UIQuickEventEnemyCount;
+
+#[derive(Component)]
+pub struct UIQuickEventCountdown {
+  duration: Timer,
+  count: usize,
+}
+
+impl Default for UIQuickEventCountdown {
+    fn default () -> Self {
+      Self {
+        duration: Timer::from_seconds(1., true),
+        count: 3,
+      }
+    }
+}
 
 pub fn ui_quick_event_spawn (
   asset_server: Res<AssetServer>,
@@ -124,6 +139,10 @@ pub fn ui_quick_event_spawn (
             parent.spawn_bundle(
               NodeBundle {
                 style: Style {
+                  margin: Rect {
+                    bottom: Val::Px(16.),
+                    ..Default::default()
+                  },
                   size: Size::new(Val::Percent(100.), Val::Auto),
                   justify_content: JustifyContent::SpaceBetween,
                   align_items: AlignItems::Center,
@@ -263,9 +282,79 @@ pub fn ui_quick_event_spawn (
 
               });
             });
+
+            // Timer
+            parent.spawn_bundle(
+              NodeBundle {
+                style: Style {
+                  position_type: PositionType::Absolute,
+                  size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                  align_items: AlignItems::Center,
+                  justify_content: JustifyContent::Center,
+                  ..Default::default()
+                },
+                color: Color::NONE.into(),
+                ..Default::default()
+              }
+            )
+            .with_children(|timer| {
+
+              // Text
+              timer.spawn_bundle(
+                TextBundle {
+                  text: Text::with_section(
+                    "3",
+                    TextStyle {
+                      font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                      font_size: 100.0,
+                      color: Color::hex("e89bac").unwrap(), 
+                    },
+                    Default::default()
+                  ),
+                  ..Default::default()
+                }
+              )
+              .insert(UIQuickEventCountdown::default());
+
+            });
+
           });
         });
       }); // 
+  }
+}
+
+pub fn quick_event_countdown (
+  time: Res<Time>,
+  mut commands: Commands,
+  mut quick_event: ResMut<QuickEvent>,
+  mut query: Query<(Entity, &mut Text, &mut UIQuickEventCountdown)>,
+) {
+  if quick_event.state != QuickEventState::Start {
+    return;
+  }
+
+  for (entity, mut text, mut countdown) in query.iter_mut() {
+    countdown.duration.tick(time.delta());
+
+    if countdown.duration.just_finished() {
+      if countdown.count < 1 {
+
+        countdown.duration.set_repeating(false);
+        countdown.duration.reset();
+        countdown.duration.pause();
+        quick_event.state = QuickEventState::Running;
+        commands.entity(entity).despawn_recursive();
+        return;
+      }
+      
+      countdown.count -= 1;
+
+      text.sections[0].value = format!(
+        "{:01}",
+        if countdown.count == 0 { "Go!".to_string() } else { countdown.count.to_string() }
+      );
+    }
   }
 }
 
