@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use heron::{CollisionEvent, CollisionLayers};
 
-use crate::physics::Layer;
+use crate::{physics::Layer, quick_event::OnQuickEvent};
 
 use super::Health;
 
@@ -42,9 +42,9 @@ pub fn kill_enemy(
 }
 
 pub fn damage (
-  mut commands: Commands,
   mut events: EventReader<CollisionEvent>,
   mut health_query: Query<&mut Health>,
+  mut event_writer: EventWriter<OnQuickEvent>,
 ) {
   events
     .iter()
@@ -68,7 +68,7 @@ pub fn damage (
           health.decrease_health(1);
         }
         if health.health <= 0 {
-          println!("Player died!");
+          event_writer.send(OnQuickEvent);
         }
       }
     });
