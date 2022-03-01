@@ -18,6 +18,7 @@ mod ui;
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 enum GameState {
   MainMenu,
+  Starting,
   Running,
   TimedEvent,
   GameOver,
