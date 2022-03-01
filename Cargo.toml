@@ -28,16 +28,18 @@ default = [
 ]
 
 dev = [
-  "bevy/dynamic",
-  "heron/debug-2d",
+  "bevy/dynamic"
 ]
 
-debug = ["bevy-inspector-egui"]
+debug = [
+  "bevy-inspector-egui",
+  "heron/debug-2d"
+]
 
 [dependencies]
 rand = "0.8.3"
 bevy = { version = "0.6", default-features = false }
-heron = { version = "2.0.1", features = ["2d", "debug-2d"] }
+heron = { version = "2.0.1", default-features = false }
 bevy_ecs_tilemap = "0.5.0"
 benimator = "2.0.1"
 bevy_kira_audio = "0.8.0"
