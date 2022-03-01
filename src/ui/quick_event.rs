@@ -23,12 +23,25 @@ pub struct UIQuickEventCountdown {
 }
 
 impl Default for UIQuickEventCountdown {
-    fn default () -> Self {
-      Self {
-        duration: Timer::from_seconds(1., true),
-        count: 3,
-      }
+  fn default () -> Self {
+    Self {
+      duration: Timer::from_seconds(1., true),
+      count: 3,
     }
+  }
+}
+
+#[derive(Component)]
+pub struct UIQuickEventResults {
+  duration: Timer,
+}
+
+impl Default for UIQuickEventResults {
+  fn default () -> Self {
+    Self {
+      duration: Timer::from_seconds(5., false),
+    }
+  }
 }
 
 pub fn ui_quick_event_spawn (
@@ -158,6 +171,7 @@ pub fn ui_quick_event_spawn (
               parent.spawn_bundle(
                 NodeBundle {
                   style: Style {
+                    padding: Rect::all(Val::Px(8.)),
                     flex_direction: FlexDirection::ColumnReverse,
                     justify_content: JustifyContent::FlexStart,
                     align_items: AlignItems::Center,
@@ -230,6 +244,7 @@ pub fn ui_quick_event_spawn (
               parent.spawn_bundle(
                 NodeBundle {
                   style: Style {
+                    padding: Rect::all(Val::Px(8.)),
                     flex_direction: FlexDirection::ColumnReverse,
                     justify_content: JustifyContent::FlexStart,
                     align_items: AlignItems::Center,
@@ -380,9 +395,103 @@ pub fn ui_update_event_count (
 }
 
 pub fn ui_quick_event_results (
+  quick_event_data: Res<QuickEventData>,
+  time: Res<Time>,
+  asset_server: Res<AssetServer>,
+  mut commands: Commands,
+  mut quick_event: ResMut<QuickEvent>,
+  mut query: Query<&mut UIQuickEventResults>,
+  query_overlay: Query<Entity, With<UIQuickEventPopup>>,
   mut event_writer: EventWriter<OnQuickEventEnd>,
 ) {
-  event_writer.send(OnQuickEventEnd);
+  if quick_event.state != QuickEventState::Results {
+    return;
+  }
+
+  // First run
+  if query.is_empty() {
+    if let Some(overlay) = query_overlay.iter().next() {
+      commands.entity(overlay)
+        .with_children(|parent| {
+          parent.spawn_bundle(
+            NodeBundle {
+              style: Style {
+                position_type: PositionType::Absolute,
+                size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+                flex_direction: FlexDirection::ColumnReverse,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..Default::default()
+              },
+              color: Color::rgba(0., 0., 0., 0.75).into(),
+              ..Default::default()
+            }
+          )
+          .insert(UIQuickEventResults::default())
+          .with_children(|results| {
+
+            let text = match quick_event_data.winner {
+              Some(QuickEventWinner::Player) => "Player wins!",
+              Some(QuickEventWinner::Enemies) => "Enemies wins!",
+              _ => "",
+            };
+
+            let text_color = match quick_event_data.winner {
+              Some(QuickEventWinner::Player) => Color::GREEN,
+              Some(QuickEventWinner::Enemies) => Color::RED,
+              _ => Color::NONE,
+            };
+
+            results.spawn_bundle(
+              TextBundle {
+                style: Style {
+                  margin: Rect {
+                    bottom: Val::Px(24.),
+                    ..Default::default()
+                  },
+                  ..Default::default()
+                },
+                text: Text::with_section(
+                  text,
+                  TextStyle {
+                    font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                    font_size: 60.0,
+                    color: text_color, 
+                  },
+                  Default::default()
+                ),
+                ..Default::default()
+              }
+            );
+
+            results.spawn_bundle(
+              TextBundle {
+                text: Text::with_section(
+                  "The winner will get some unfair advantages ;)",
+                  TextStyle {
+                    font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                    font_size: 40.0,
+                    color: Color::WHITE, 
+                  },
+                  Default::default()
+                ),
+                ..Default::default()
+              }
+            );
+
+          });
+        });
+    }
+  } else {
+    if let Some(mut results) = query.iter_mut().next() {
+      results.duration.tick(time.delta());
+
+      if results.duration.finished() {
+        // send other events here maybe? like player recovering life etc
+        event_writer.send(OnQuickEventEnd);
+      }
+    }
+  }
 }
 
 pub fn ui_quick_event_despawn (

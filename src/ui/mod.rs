@@ -34,6 +34,7 @@ impl Plugin for UIPlugin {
         SystemSet::on_update(GameState::TimedEvent)
           .with_system(ui_update_event_count)
           .with_system(quick_event_countdown)
+          .with_system(ui_quick_event_results)
       )
       .add_system_set(
         SystemSet::on_exit(GameState::TimedEvent)
