@@ -3,6 +3,13 @@ use rand::prelude::*;
 
 use crate::GameState;
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum QuickEventState {
+  Start,
+  Running,
+  Results,
+}
+
 #[derive(Debug, Clone)]
 pub struct KeyBind {
   pub key: KeyCode,
@@ -64,12 +71,14 @@ impl Plugin for QuickEventPlugin {
           .with_system(quick_event_listener)
       )
       .add_system_set(
-        SystemSet::on_update(GameState::TimedEvent)
-          .with_system(quick_event_input)
+        SystemSet::on_enter(GameState::TimedEvent)
+          .with_system(quick_event_startup)
       )
       .add_system_set(
         SystemSet::on_update(GameState::TimedEvent)
+          .with_system(quick_event_input)
           .with_system(quick_event_time_track)
+          .with_system(quick_event_on_end)
       )
       .add_system_set(
         SystemSet::on_exit(GameState::TimedEvent)
@@ -83,6 +92,7 @@ pub struct OnQuickEventEnd;
 
 #[derive(Debug, Clone)]
 pub struct QuickEvent {
+  pub state: QuickEventState,
   duration: f32,
   // Keys pressed per second
   enemy_speed: f32,
@@ -91,6 +101,7 @@ pub struct QuickEvent {
 impl Default for QuickEvent {
   fn default () -> Self {
     Self {
+      state: QuickEventState::Start,
       duration: 5.,
       enemy_speed: 1.,
     }
@@ -133,23 +144,7 @@ fn quick_event_listener (
   }
 }
 
-fn quick_event_time_track (
-  time: Res<Time>,
-  quick_event: Res<QuickEvent>,
-  mut quick_event_data: ResMut<QuickEventData>,
-  mut event_writer: EventWriter<OnQuickEventEnd>,
-  mut state: ResMut<State<GameState>>,
-) {
-  quick_event_data.time_passed += time.delta_seconds();
-
-  if quick_event_data.time_passed >=quick_event.duration {
-    event_writer.send(OnQuickEventEnd);
-
-    if &GameState::TimedEvent == state.current() {
-      state.set(GameState::Running).unwrap();
-    }
-  }
-}
+fn quick_event_startup () {}
 
 fn quick_event_input (
   keyboard_input: Res<Input<KeyCode>>,
@@ -157,6 +152,10 @@ fn quick_event_input (
   mut quick_event_data: ResMut<QuickEventData>,
   mut state: ResMut<State<GameState>>,
 ) {
+  if quick_event.state != QuickEventState::Running {
+    return;
+  }
+
   let enemy_interval = quick_event.enemy_speed / quick_event.duration;
   quick_event_data.enemy_count = (quick_event_data.time_passed / enemy_interval).floor() as usize;
 
@@ -169,7 +168,33 @@ fn quick_event_input (
       state.set(GameState::Running).unwrap();
     }
   }
+}
 
+fn quick_event_time_track (
+  time: Res<Time>,
+  mut quick_event: ResMut<QuickEvent>,
+  mut quick_event_data: ResMut<QuickEventData>,
+) {
+  if quick_event.state != QuickEventState::Running {
+    return;
+  }
+
+  quick_event_data.time_passed += time.delta_seconds();
+
+  if quick_event_data.time_passed >=quick_event.duration {
+    quick_event.state = QuickEventState::Results;
+  }
+}
+
+fn quick_event_on_end (
+  mut event_reader: EventReader<OnQuickEventEnd>,
+  mut state: ResMut<State<GameState>>,
+) {
+  for _ in event_reader.iter() {
+    if &GameState::TimedEvent == state.current() {
+      state.set(GameState::Running).unwrap();
+    }
+  }
 }
 
 fn quick_event_on_exit (
