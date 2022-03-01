@@ -10,6 +10,12 @@ pub enum QuickEventState {
   Results,
 }
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub enum QuickEventWinner {
+  Player,
+  Enemies,
+}
+
 #[derive(Debug, Clone)]
 pub struct KeyBind {
   pub key: KeyCode,
@@ -114,6 +120,7 @@ pub struct QuickEventData {
   pub player_count: usize,
   pub enemy_count: usize,
   pub time_passed: f32,
+  pub winner: Option<QuickEventWinner>,
 }
 
 impl Default for QuickEventData {
@@ -123,6 +130,7 @@ impl Default for QuickEventData {
       player_count: 0,
       enemy_count: 0,
       time_passed: 0.0,
+      winner: None,
     }
   }
 }
@@ -182,6 +190,16 @@ fn quick_event_time_track (
   quick_event_data.time_passed += time.delta_seconds();
 
   if quick_event_data.time_passed >=quick_event.duration {
+    // End Duel!
+    quick_event_data.winner = Some(
+      // The enemies have the draw advantage here :eyes:
+      // maybe i should put it in the ui somehow?
+      if quick_event_data.player_count > quick_event_data.enemy_count {
+        QuickEventWinner::Player
+      } else {
+        QuickEventWinner::Enemies
+      }
+    );
     quick_event.state = QuickEventState::Results;
   }
 }

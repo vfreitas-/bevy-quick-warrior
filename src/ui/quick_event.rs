@@ -379,6 +379,12 @@ pub fn ui_update_event_count (
   }
 }
 
+pub fn ui_quick_event_results (
+  mut event_writer: EventWriter<OnQuickEventEnd>,
+) {
+  event_writer.send(OnQuickEventEnd);
+}
+
 pub fn ui_quick_event_despawn (
   mut commands: Commands,
   query: Query<Entity, With<UIQuickEventPopup>>,
