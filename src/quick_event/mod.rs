@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::GameState;
+use crate::{GameState, score::{ScoreTypes, OnScorePoints}};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum QuickEventState {
@@ -212,6 +212,7 @@ fn quick_event_on_end (
   mut quick_event: ResMut<QuickEvent>,
   mut event_reader: EventReader<OnQuickEventEnd>,
   mut player_win_writer: EventWriter<OnQuickEventPlayerWin>,
+  mut score_writer: EventWriter<OnScorePoints>,
   mut state: ResMut<State<GameState>>,
 ) {
   for _ in event_reader.iter() {
@@ -221,6 +222,8 @@ fn quick_event_on_end (
         // return to the game and send an event to the player and level
         state.set(GameState::Running).unwrap();
         player_win_writer.send(OnQuickEventPlayerWin);
+        score_writer.send(OnScorePoints(ScoreTypes::Duel));
+        
       } else {
         state.set(GameState::GameOver).unwrap();
       }

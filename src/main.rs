@@ -13,6 +13,7 @@ mod character;
 mod level;
 mod quick_event;
 mod ui;
+mod score;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -48,6 +49,7 @@ fn main() {
     .add_plugin(enemy::EnemyPlugin)
     .add_plugin(quick_event::QuickEventPlugin)
     .add_plugin(ui::UIPlugin)
+    .add_plugin(score::ScorePlugin)
     .add_system(bevy::input::system::exit_on_esc_system);
 
   #[cfg(all(feature = "debug"))]

@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use heron::{CollisionEvent, CollisionLayers};
 
-use crate::{physics::Layer, quick_event::OnQuickEvent};
+use crate::{
+  physics::Layer, 
+  quick_event::OnQuickEvent, 
+  score::{ScoreTypes, OnScorePoints}
+};
 
 use super::Health;
 
@@ -19,7 +23,8 @@ fn is_enemy(layers: CollisionLayers) -> bool {
 
 pub fn kill_enemy(
   mut commands: Commands,
-  mut events: EventReader<CollisionEvent>
+  mut events: EventReader<CollisionEvent>,
+  mut score_writer: EventWriter<OnScorePoints>,
 ) {
   events
     .iter()
@@ -38,7 +43,10 @@ pub fn kill_enemy(
         None
       }
     })
-    .for_each(|enemy_entity| commands.entity(enemy_entity).despawn());
+    .for_each(|enemy_entity| {
+      commands.entity(enemy_entity).despawn();
+      score_writer.send(OnScorePoints(ScoreTypes::Enemy));
+    });
 }
 
 pub fn damage (
