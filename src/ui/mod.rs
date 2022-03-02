@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use crate::{
   GameState, 
-  quick_event::OnQuickEvent, 
-  utils::ecs::should_run, 
+  quick_event::OnQuickEvent,
   character::Health, 
   player::Player
 };
@@ -14,6 +13,12 @@ pub use utils::*;
 use quick_event::*;
 use game_over::*;
 
+#[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
+enum UiLabel {
+  Setup,
+  HUD,
+}
+
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
@@ -21,11 +26,17 @@ impl Plugin for UIPlugin {
     app
       .add_system_set(
         SystemSet::on_enter(GameState::Starting)
-          .with_system(ui_setup)
+          .with_system(ui_setup.label(UiLabel::Setup))
+          // TODO: use this instead of a new set on the running state
+          // this is not working idk why
+          // .with_system(
+          //   ui_player_spawn
+          //     .label(UiLabel::HUD)
+          //     .after(UiLabel::Setup)
+          // )
       )
       .add_system_set(
         SystemSet::on_enter(GameState::Running)
-          .with_run_criteria(should_run::<UIPlayerHUD>)
           .with_system(ui_player_spawn)
       )
       .add_system_set(

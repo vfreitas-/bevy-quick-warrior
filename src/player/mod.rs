@@ -96,7 +96,7 @@ fn player_setup(
     .with_group(Layer::Player)
     .with_masks(&[Layer::World, Layer::Enemy])
   )
-  .insert(Health::from_health(1))
+  .insert(Health::from_health(5))
   .with_children(|parent| {
 
     parent.spawn_bundle(SpriteSheetBundle {
