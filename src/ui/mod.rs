@@ -26,18 +26,11 @@ impl Plugin for UIPlugin {
       .add_system_set(
         SystemSet::on_enter(GameState::Starting)
           .with_system(ui_setup.label(UiLabel::Setup))
-          // TODO: use this instead of a new set on the running state
-          // this is not working idk why
-          // .with_system(
-          //   ui_player_spawn
-          //     .label(UiLabel::HUD)
-          //     .after(UiLabel::Setup)
-          // )
-      )
-      .add_system_set(
-        SystemSet::on_enter(GameState::Running)
-          .with_run_criteria(should_run::<UIPlayerHUD>)
-          .with_system(ui_player_spawn)
+          .with_system(
+            ui_player_spawn
+              .label(UiLabel::HUD)
+              .after(UiLabel::Setup)
+          )
       )
       .add_system_set(
         SystemSet::on_update(GameState::Running)
@@ -95,7 +88,12 @@ fn ui_setup (
   commands.spawn_bundle(
     UiCameraBundle::default()
   );
+}
 
+fn ui_player_spawn (
+  asset_server: Res<AssetServer>,
+  mut commands: Commands,
+) {
   commands.spawn_bundle(
     NodeBundle {
       style: Style {
@@ -107,92 +105,82 @@ fn ui_setup (
       ..Default::default()
     }
   )
-  .insert(UIRootNode);
-}
+  .insert(UIRootNode)
+  .with_children(|parent| {
 
-fn ui_player_spawn (
-  asset_server: Res<AssetServer>,
-  mut commands: Commands,
-  mut query: Query<Entity, With<UIRootNode>>,
-) {
-  if let Some(root) = query.iter_mut().next() {
-    commands.entity(root)
+    parent.spawn_bundle(
+      NodeBundle {
+        style: Style {
+          size: Size::new(Val::Percent(100.), Val::Px(100.)),
+          justify_content: JustifyContent::SpaceBetween,
+          align_items: AlignItems::Center,
+          ..Default::default()
+        },
+        color: Color::NONE.into(),
+        ..Default::default()
+      }
+    )
+    .insert(UIPlayerHUD)
+    .with_children(|player_hud| {
+
+      player_hud.spawn_bundle(
+        NodeBundle {
+          style: Style {
+            padding: Rect::all(Val::Px(24.)),
+            size: Size::new(Val::Percent(100.), Val::Px(80.)),
+            justify_content: JustifyContent::FlexStart,
+            align_items: AlignItems::Center,
+            ..Default::default()
+          },
+          color: Color::NONE.into(),
+          ..Default::default()
+        }
+      )
+      .insert(UIPlayerHealthbar);
+
+      // Score text
+      player_hud.spawn_bundle(
+        NodeBundle {
+          style: Style {
+            padding: Rect::all(Val::Px(24.)),
+            ..Default::default()
+          },
+          color: Color::NONE.into(),
+          ..Default::default()
+        }
+      )
       .with_children(|parent| {
-
         parent.spawn_bundle(
-          NodeBundle {
-            style: Style {
-              size: Size::new(Val::Percent(100.), Val::Px(100.)),
-              justify_content: JustifyContent::SpaceBetween,
-              align_items: AlignItems::Center,
-              ..Default::default()
+          TextBundle {
+            text: Text {
+              sections: vec![
+                TextSection {
+                  value: "Score: ".to_string(),
+                  style: TextStyle {
+                    font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                    font_size: 40.0,
+                    color: Color::WHITE, 
+                  },
+                },
+                TextSection {
+                  value: "0000".to_string(),
+                  style: TextStyle {
+                    font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                    font_size: 40.0,
+                    color: Color::WHITE, 
+                  },
+                }
+              ],
+              alignment: Default::default()
             },
-            color: Color::NONE.into(),
             ..Default::default()
           }
         )
-        .insert(UIPlayerHUD)
-        .with_children(|player_hud| {
-
-          player_hud.spawn_bundle(
-            NodeBundle {
-              style: Style {
-                padding: Rect::all(Val::Px(24.)),
-                size: Size::new(Val::Percent(100.), Val::Px(80.)),
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::Center,
-                ..Default::default()
-              },
-              color: Color::NONE.into(),
-              ..Default::default()
-            }
-          )
-          .insert(UIPlayerHealthbar);
-
-          // Score text
-          player_hud.spawn_bundle(
-            NodeBundle {
-              style: Style {
-                padding: Rect::all(Val::Px(24.)),
-                ..Default::default()
-              },
-              color: Color::NONE.into(),
-              ..Default::default()
-            }
-          )
-          .with_children(|parent| {
-            parent.spawn_bundle(
-              TextBundle {
-                text: Text {
-                  sections: vec![
-                    TextSection {
-                      value: "Score: ".to_string(),
-                      style: TextStyle {
-                        font: asset_server.load("Fonts/KenneyPixel.ttf"),
-                        font_size: 40.0,
-                        color: Color::WHITE, 
-                      },
-                    },
-                    TextSection {
-                      value: "0000".to_string(),
-                      style: TextStyle {
-                        font: asset_server.load("Fonts/KenneyPixel.ttf"),
-                        font_size: 40.0,
-                        color: Color::WHITE, 
-                      },
-                    }
-                  ],
-                  alignment: Default::default()
-                },
-                ..Default::default()
-              }
-            )
-            .insert(UIHUDScoreText);
-          });
-
-        });
+        .insert(UIHUDScoreText);
       });
-  }
+
+    });
+  });
 }
 
 fn ui_health_bar (
