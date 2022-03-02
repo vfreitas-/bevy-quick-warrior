@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 use crate::{
   GameState, 
-  quick_event::OnQuickEvent,
   character::Health, 
-  player::Player
+  player::Player, score::Score, utils::ecs::should_run
 };
 
 mod utils;
@@ -37,12 +36,13 @@ impl Plugin for UIPlugin {
       )
       .add_system_set(
         SystemSet::on_enter(GameState::Running)
+          .with_run_criteria(should_run::<UIPlayerHUD>)
           .with_system(ui_player_spawn)
       )
       .add_system_set(
         SystemSet::on_update(GameState::Running)
           .with_system(ui_health_bar)
-          .with_system(button_system)
+          .with_system(score_update)
       )
       .add_system_set(
         SystemSet::on_enter(GameState::TimedEvent)
@@ -87,7 +87,7 @@ pub struct UIPlayerHealthbar;
 pub struct UIPlayerHealthbarLife;
 
 #[derive(Component)]
-pub struct UIEventBtn;
+pub struct UIHUDScoreText;
 
 fn ui_setup (
   mut commands: Commands,
@@ -118,12 +118,12 @@ fn ui_player_spawn (
   if let Some(root) = query.iter_mut().next() {
     commands.entity(root)
       .with_children(|parent| {
+
         parent.spawn_bundle(
           NodeBundle {
             style: Style {
               size: Size::new(Val::Percent(100.), Val::Px(100.)),
-              align_self: AlignSelf::FlexEnd,
-              justify_content: JustifyContent::Center,
+              justify_content: JustifyContent::SpaceBetween,
               align_items: AlignItems::Center,
               ..Default::default()
             },
@@ -132,9 +132,9 @@ fn ui_player_spawn (
           }
         )
         .insert(UIPlayerHUD)
-        .with_children(|parent| {
+        .with_children(|player_hud| {
 
-          parent.spawn_bundle(
+          player_hud.spawn_bundle(
             NodeBundle {
               style: Style {
                 padding: Rect::all(Val::Px(24.)),
@@ -148,39 +148,47 @@ fn ui_player_spawn (
             }
           )
           .insert(UIPlayerHealthbar);
-          
-          // Quick Event Button
-          #[cfg(all(feature = "debug"))]
-          parent.spawn_bundle(
-            ButtonBundle {
+
+          // Score text
+          player_hud.spawn_bundle(
+            NodeBundle {
               style: Style {
-                position_type: PositionType::Absolute,
-                padding: Rect::all(Val::Px(8.)),
-                size: Size::new(Val::Auto, Val::Px(40.)),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
+                padding: Rect::all(Val::Px(24.)),
                 ..Default::default()
               },
-              color: Color::DARK_GRAY.into(),
+              color: Color::NONE.into(),
               ..Default::default()
             }
           )
-          .insert(UIEventBtn)
           .with_children(|parent| {
-            parent.spawn_bundle(TextBundle {
-              text: Text::with_section(
-                "Quick Event",
-                TextStyle {
-                  font: asset_server.load("Fonts/KenneyPixel.ttf"),
-                  font_size: 24.0,
-                  color: Color::WHITE,
+            parent.spawn_bundle(
+              TextBundle {
+                text: Text {
+                  sections: vec![
+                    TextSection {
+                      value: "Score: ".to_string(),
+                      style: TextStyle {
+                        font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                        font_size: 40.0,
+                        color: Color::WHITE, 
+                      },
+                    },
+                    TextSection {
+                      value: "0000".to_string(),
+                      style: TextStyle {
+                        font: asset_server.load("Fonts/KenneyPixel.ttf"),
+                        font_size: 40.0,
+                        color: Color::WHITE, 
+                      },
+                    }
+                  ],
+                  alignment: Default::default()
                 },
-                Default::default()
-              ),
-              ..Default::default()
-            });
-          }); // Quick Event Button
-
+                ..Default::default()
+              }
+            )
+            .insert(UIHUDScoreText);
+          });
 
         });
       });
@@ -234,20 +242,15 @@ fn ui_health_bar (
   }
 }
 
-fn button_system(
-  mut interaction_query: Query<
-    &Interaction,
-    (Changed<Interaction>, With<UIEventBtn>),
-  >,
-  mut event_writer: EventWriter<OnQuickEvent>,
+pub fn score_update (
+  score: Res<Score>,
+  mut query: Query<&mut Text, With<UIHUDScoreText>>,
 ) {
-  for interaction in interaction_query.iter_mut() {
-    match *interaction {
-      Interaction::Clicked => {
-        event_writer.send(OnQuickEvent);
-      }
-      _ => (),
-    }
+  if let Some(mut text) = query.iter_mut().next() {
+    text.sections[1].value = format!(
+      "{:04}",
+      score.points
+    );
   }
 }
 
