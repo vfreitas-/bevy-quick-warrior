@@ -30,7 +30,7 @@ fn main() {
 
   app
     .insert_resource(WindowDescriptor {
-      title: "Template".to_string(),
+      title: "Quick Warrior".to_string(),
       width: 960.0, // 1280 - 960 - 640
       height: 720.0, // 960 - 720 - 480
       resizable: false,
