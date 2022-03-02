@@ -32,7 +32,7 @@ impl Health {
       max_health: health,
       health: health,
       is_invincible: false,
-      invincible_duration: Timer::from_seconds(5., false),
+      invincible_duration: Timer::from_seconds(1., false),
     }
   }
 
