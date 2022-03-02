@@ -11,3 +11,16 @@ Controls:
 - **WASD** for movement
 - **F** to attack
 - **Space** to dash
+
+## How to run
+
+For development
+
+```bash
+$ cargo make watch
+```
+
+To make a WASM release
+```bash
+$ cargo make release
+```
