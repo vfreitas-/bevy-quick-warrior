@@ -398,8 +398,8 @@ pub fn ui_quick_event_results (
   quick_event_data: Res<QuickEventData>,
   time: Res<Time>,
   asset_server: Res<AssetServer>,
+  quick_event: Res<QuickEvent>,
   mut commands: Commands,
-  mut quick_event: ResMut<QuickEvent>,
   mut query: Query<&mut UIQuickEventResults>,
   query_overlay: Query<Entity, With<UIQuickEventPopup>>,
   mut event_writer: EventWriter<OnQuickEventEnd>,
@@ -436,6 +436,12 @@ pub fn ui_quick_event_results (
               _ => "",
             };
 
+            let desc = match quick_event_data.winner {
+              Some(QuickEventWinner::Player) => "You will get some unfair advantages ;)",
+              Some(QuickEventWinner::Enemies) => "You weren't quick enough ;(",
+              _ => "",
+            };
+
             let text_color = match quick_event_data.winner {
               Some(QuickEventWinner::Player) => Color::GREEN,
               Some(QuickEventWinner::Enemies) => Color::RED,
@@ -467,7 +473,7 @@ pub fn ui_quick_event_results (
             results.spawn_bundle(
               TextBundle {
                 text: Text::with_section(
-                  "The winner will get some unfair advantages ;)",
+                  desc,
                   TextStyle {
                     font: asset_server.load("Fonts/KenneyPixel.ttf"),
                     font_size: 40.0,
@@ -487,7 +493,6 @@ pub fn ui_quick_event_results (
       results.duration.tick(time.delta());
 
       if results.duration.finished() {
-        // send other events here maybe? like player recovering life etc
         event_writer.send(OnQuickEventEnd);
       }
     }

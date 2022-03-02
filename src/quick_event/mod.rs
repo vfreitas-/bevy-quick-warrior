@@ -63,8 +63,13 @@ const KEYBINDS: [KeyBind; 36] = [
   KeyBind { key: KeyCode::Z, sprite: "Art/UI/Keybinds/Z.png", label: "Z" },
 ];
 
-pub struct QuickEventPlugin;
+pub struct OnQuickEvent;
 
+pub struct OnQuickEventEnd;
+
+pub struct OnQuickEventPlayerWin;
+
+pub struct QuickEventPlugin;
 impl Plugin for QuickEventPlugin {
   fn build(&self, app: &mut App) {
     app
@@ -72,6 +77,7 @@ impl Plugin for QuickEventPlugin {
       .init_resource::<QuickEventData>()
       .add_event::<OnQuickEvent>()
       .add_event::<OnQuickEventEnd>()
+      .add_event::<OnQuickEventPlayerWin>()
       .add_system_set(
         SystemSet::on_update(GameState::Running)
           .with_system(quick_event_listener)
@@ -92,9 +98,6 @@ impl Plugin for QuickEventPlugin {
       );
   }
 }
-
-pub struct OnQuickEvent;
-pub struct OnQuickEventEnd;
 
 #[derive(Debug, Clone)]
 pub struct QuickEvent {
@@ -205,12 +208,22 @@ fn quick_event_time_track (
 }
 
 fn quick_event_on_end (
+  quick_event_data: Res<QuickEventData>,
+  mut quick_event: ResMut<QuickEvent>,
   mut event_reader: EventReader<OnQuickEventEnd>,
+  mut player_win_writer: EventWriter<OnQuickEventPlayerWin>,
   mut state: ResMut<State<GameState>>,
 ) {
   for _ in event_reader.iter() {
     if &GameState::TimedEvent == state.current() {
-      state.set(GameState::Running).unwrap();
+      quick_event.state = QuickEventState::Start;
+      if quick_event_data.winner == Some(QuickEventWinner::Player) {
+        // return to the game and send an event to the player and level
+        state.set(GameState::Running).unwrap();
+        player_win_writer.send(OnQuickEventPlayerWin);
+      } else {
+        state.set(GameState::GameOver).unwrap();
+      }
     }
   }
 }
