@@ -3,12 +3,21 @@ use bevy::{
   render::camera::{DepthCalculation, ScalingMode, WindowOrigin},
 };
 
+use crate::GameState;
+
 pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
   fn build(&self, app: &mut App) {
     app
-      .add_startup_system(camera_setup);
+      .add_system_set(
+        SystemSet::on_enter(GameState::Starting)
+          .with_system(camera_setup)
+      )
+      .add_system_set(
+        SystemSet::on_enter(GameState::GameOver)
+          .with_system(camera_despawn)
+      );
   }
 }
 
@@ -36,4 +45,13 @@ fn camera_setup(mut commands: Commands, mut windows: ResMut<Windows>) {
   let window = windows.get_primary_mut().unwrap();
   #[cfg(all(feature = "debug"))]
   window.set_position(IVec2::new(1550, 200));
+}
+
+pub fn camera_despawn (
+  mut commands: Commands,
+  query: Query<Entity, With<MainCamera>>,
+) {
+  if let Some(entity) = query.iter().next() {
+    commands.entity(entity).despawn_recursive();
+  }
 }

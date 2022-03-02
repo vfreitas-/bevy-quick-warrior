@@ -25,6 +25,12 @@ impl Default for SpawnData {
   }
 }
 
+pub fn spawn_startup (
+  mut commands: Commands,
+) {
+  commands.insert_resource(SpawnData::default());
+}
+
 pub fn spawn_enemies_constant(
   time: Res<Time>,
   mut spawn_data: ResMut<SpawnData>,

@@ -19,7 +19,10 @@ pub struct UIPlugin;
 impl Plugin for UIPlugin {
   fn build(&self, app: &mut App) {
     app
-      .add_startup_system(ui_setup)
+      .add_system_set(
+        SystemSet::on_enter(GameState::Starting)
+          .with_system(ui_setup)
+      )
       .add_system_set(
         SystemSet::on_enter(GameState::Running)
           .with_run_criteria(should_run::<UIPlayerHUD>)
@@ -46,6 +49,7 @@ impl Plugin for UIPlugin {
       )
       .add_system_set(
         SystemSet::on_enter(GameState::GameOver)
+          .with_system(hud_despawn)
           .with_system(ui_game_over_spawn)
       )
       .add_system_set(
@@ -233,5 +237,14 @@ fn button_system(
       }
       _ => (),
     }
+  }
+}
+
+pub fn hud_despawn (
+  mut commands: Commands,
+  query: Query<Entity, With<UIRootNode>>,
+) {
+  if let Some(entity) = query.iter().next() {
+    commands.entity(entity).despawn_recursive();
   }
 }

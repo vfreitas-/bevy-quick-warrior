@@ -17,6 +17,10 @@ impl Plugin for EnemyPlugin {
       .add_system_set(
         SystemSet::on_exit(GameState::Running)
           .with_system(enemy_pause)
+      )
+      .add_system_set(
+        SystemSet::on_enter(GameState::GameOver)
+          .with_system(enemy_despawn)
       );
   }
 }
@@ -76,5 +80,14 @@ fn enemy_pause (
 ) {
   for mut velocity in query.iter_mut() {
     velocity.linear = Vec3::ZERO;
+  }
+}
+
+pub fn enemy_despawn (
+  mut commands: Commands,
+  query: Query<Entity, With<Enemy>>,
+) {
+  for entity in query.iter() {
+    commands.entity(entity).despawn_recursive();
   }
 }

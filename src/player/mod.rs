@@ -17,8 +17,11 @@ impl Plugin for PlayerPlugin {
         StartupStage::PreStartup, 
         create_animations
       )
-      .add_startup_system(player_setup)
       .add_system(player_on_win)
+      .add_system_set(
+        SystemSet::on_enter(GameState::Starting)
+          .with_system(player_setup)
+      )
       .add_system_set(
         // TODO: improve order with labels
         SystemSet::on_update(GameState::Running)
@@ -30,6 +33,10 @@ impl Plugin for PlayerPlugin {
       .add_system_set(
         SystemSet::on_exit(GameState::Running)
           .with_system(player_pause)
+      )
+      .add_system_set(
+        SystemSet::on_enter(GameState::GameOver)
+          .with_system(player_despawn)
       );
   }
 }
@@ -267,5 +274,14 @@ fn player_on_win (
       // maybe move the player to a safe area?
       health.fill_health();
     }
+  }
+}
+
+pub fn player_despawn (
+  mut commands: Commands,
+  query: Query<Entity, With<Player>>,
+) {
+  if let Some(entity) = query.iter().next() {
+    commands.entity(entity).despawn_recursive();
   }
 }
