@@ -29,6 +29,7 @@ impl Plugin for PlayerPlugin {
           .with_system(player_movement)
           .with_system(player_attack_added)
           .with_system(player_attacking)
+          .with_system(player_dash)
       )
       .add_system_set(
         SystemSet::on_exit(GameState::Running)
@@ -43,12 +44,14 @@ impl Plugin for PlayerPlugin {
 
 #[derive(Component)]
 pub struct Player {
+  speed: f32,
   attack_duration: f32,
 }
 
 impl Default for Player {
   fn default () -> Self {
     Self {
+      speed: 5000.,
       attack_duration: 0.4,
     }
   }
@@ -57,10 +60,23 @@ impl Default for Player {
 #[derive(Component, Default)]
 pub struct PlayerMovement {
   velocity: Vec2,
+  speed: f32,
 }
 
 #[derive(Component)]
-pub struct PlayerDash;
+pub struct PlayerDash {
+  speed: f32,
+  duration: Timer,
+}
+
+impl Default for PlayerDash {
+  fn default () -> Self {
+    Self {
+      speed: 15000.,
+      duration: Timer::from_seconds(0.3, false),
+    }
+  }
+}
 
 #[derive(Component, Default)]
 pub struct PlayerAttack {
@@ -133,22 +149,33 @@ fn player_setup(
 fn player_input(
   keyboard_input: Res<Input<KeyCode>>,
   mut commands: Commands,
-  mut query: Query<(Entity, &mut PlayerMovement, Option<&PlayerAttack>), With<Player>>,
+  mut query: Query<(
+    Entity, 
+    &mut PlayerMovement, 
+    &Player, 
+    Option<&PlayerAttack>,
+    Option<&PlayerDash>,
+  ), With<Player>>,
 ) {
   if let Some((
     entity, 
-    mut player_movement, 
-    attacking)
-  ) = query.iter_mut().next() {
-    // if commands.
+    mut player_movement,
+    player,
+    attacking,
+    dashing
+  )) = query.iter_mut().next() {
+
+    if dashing.is_some() {
+      return;
+    }
+
     if attacking.is_some() {
       player_movement.velocity = Vec2::ZERO;
       return;
     }
 
     if keyboard_input.just_pressed(KeyCode::Space) {
-      // insert dash component
-      commands.entity(entity).insert(PlayerDash);
+      commands.entity(entity).insert(PlayerDash::default());
     } else if keyboard_input.just_pressed(KeyCode::F) {
         commands.entity(entity).insert(PlayerAttack::default());
     } else {
@@ -168,6 +195,7 @@ fn player_input(
     
       input_velocity = input_velocity.normalize_or_zero();
       player_movement.velocity = input_velocity;
+      player_movement.speed = player.speed;
     }
   }
 }
@@ -209,12 +237,31 @@ fn player_movement(
       }
     }
 
-    let input_velocity = player_movement.velocity * 5000. * time.delta_seconds();
+    let input_velocity = player_movement.velocity * player_movement.speed * time.delta_seconds();
     velocity.linear = Vec3::new(input_velocity.x, input_velocity.y, 1.);
   }
 }
 
-// fn player_dash() {}
+fn player_dash(
+  time: Res<Time>,
+  mut commands: Commands,
+  mut query: Query<(Entity, &mut PlayerDash, &mut PlayerMovement), With<Player>>,
+) {
+  if let Some((
+    entity, 
+    mut player_dash, 
+    mut player_movement)
+  ) = query.iter_mut().next() {
+    player_dash.duration.tick(time.delta());
+
+    player_movement.speed = player_dash.speed;
+
+    if player_dash.duration.just_finished() {
+      player_movement.velocity = Vec2::ZERO;
+      commands.entity(entity).remove::<PlayerDash>();
+    }
+  }
+}
 
 fn player_attack_added (
   mut commands: Commands,
