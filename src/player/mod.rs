@@ -102,10 +102,11 @@ fn player_setup(
       ..Default::default()
     }
   )
-  .insert(RigidBody::KinematicVelocityBased)
+  .insert(RigidBody::Dynamic)
   .insert(CollisionShape::Sphere { radius: 7. })
   .insert(Velocity::from_linear(Vec3::ZERO))
   .insert(Acceleration::from_linear(Vec3::ZERO))
+  .insert(RotationConstraints::lock())
   .insert(Player::default())
   .insert(PlayerMovement::default())
   .insert(CollisionLayers::none()
