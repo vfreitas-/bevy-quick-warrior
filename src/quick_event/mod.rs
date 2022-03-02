@@ -150,7 +150,9 @@ fn quick_event_listener (
 
       quick_event_data.keybind = KEYBINDS[index as usize].clone();
 
-      state.set(GameState::TimedEvent).unwrap();
+      if let Err(changed) = state.set(GameState::TimedEvent) {
+        println!("[QuickEvent] {:?}", changed);
+      }
     }
   }
 }
@@ -225,7 +227,9 @@ fn quick_event_on_end (
         score_writer.send(OnScorePoints(ScoreTypes::Duel));
         
       } else {
-        state.set(GameState::GameOver).unwrap();
+        if let Err(changed) = state.set(GameState::GameOver) {
+          println!("[QuickEvent] {:?}", changed);
+        }
       }
     }
   }

@@ -24,6 +24,7 @@ pub struct Health {
   pub health: usize,
   pub is_invincible: bool,
   pub invincible_duration: Timer,
+  pub dead: bool,
 }
 
 impl Health {
@@ -33,6 +34,7 @@ impl Health {
       health: health,
       is_invincible: false,
       invincible_duration: Timer::from_seconds(1., false),
+      dead: false,
     }
   }
 
@@ -42,6 +44,7 @@ impl Health {
     }
 
     if self.health == 0 {
+      self.dead = true;
       return;
     }
 

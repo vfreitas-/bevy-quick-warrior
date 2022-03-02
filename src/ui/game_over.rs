@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::GameState;
+use crate::{GameState, score::Score};
 
 use super::basic_text;
 
@@ -9,6 +9,7 @@ pub struct UIGameOverRoot;
 
 pub fn ui_game_over_spawn(
   asset_server: Res<AssetServer>,
+  score: Res<Score>,
   mut commands: Commands,
 ) {
 
@@ -32,26 +33,32 @@ pub fn ui_game_over_spawn(
     let font = asset_server.load("Fonts/KenneyPixel.ttf");
 
     root.spawn_bundle(
-      basic_text("Game Over!", 96.0, font.clone(), Some(24.)),
+      basic_text("Game Over!", 96.0, font.clone(), Some(48.)),
     );
 
-    let points = 100;
-    let text = if points >= 100 {
+    root.spawn_bundle(
+      basic_text(
+        format!("You made: {:04} points", score.points).as_str(), 
+        40.0, 
+        font.clone(), 
+        Some(16.)
+      ),
+    );
+
+    let text = if score.points <= 3000 {
       "You were very slow"
-    } else if points >= 1000 {
-      "Ohhh you were quick..but can be quickier xD"
-    } else if points >= 5000 {
-      "Quick as a bullet, congratulations!"
+    } else if score.points <= 10000 {
+      "You did well, but could be quicker"
     } else {
-      ""
+      "You are quicker as a bullet. Congrats!"
     };
 
     root.spawn_bundle(
-      basic_text(text, 48., font.clone(), Some(48.))
+      basic_text(text, 40., font.clone(), Some(48.))
     );
 
     root.spawn_bundle(
-      basic_text("Press space to try again or ESC to quit.", 32., font.clone(), None),
+      basic_text("Press space to try again or ESC to quit.", 24., font.clone(), None),
     );
 
   });
