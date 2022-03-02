@@ -53,6 +53,11 @@ impl Health {
     self.health -= value;
     self.is_invincible = true;
   }
+
+  pub fn fill_health(&mut self) {
+    self.health = self.max_health;
+    self.is_invincible = true;
+  }
 }
 
 #[derive(Component, Default)]

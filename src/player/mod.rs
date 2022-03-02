@@ -1,4 +1,4 @@
-use crate::{GameState, physics::Layer, character::Health};
+use crate::{GameState, physics::Layer, character::Health, quick_event::OnQuickEventPlayerWin};
 use benimator::*;
 use bevy::prelude::*;
 use heron::*;
@@ -18,6 +18,7 @@ impl Plugin for PlayerPlugin {
         create_animations
       )
       .add_startup_system(player_setup)
+      .add_system(player_on_win)
       .add_system_set(
         // TODO: improve order with labels
         SystemSet::on_update(GameState::Running)
@@ -88,7 +89,7 @@ fn player_setup(
     .with_group(Layer::Player)
     .with_masks(&[Layer::World, Layer::Enemy])
   )
-  .insert(Health::from_health(5))
+  .insert(Health::from_health(1))
   .with_children(|parent| {
 
     parent.spawn_bundle(SpriteSheetBundle {
@@ -254,5 +255,17 @@ fn player_pause (
   if let Some((mut velocity, mut player_movement)) = query.iter_mut().next() {
     velocity.linear = Vec3::ZERO;
     player_movement.velocity = Vec2::ZERO;
+  }
+}
+
+fn player_on_win (
+  mut player_win_reader: EventReader<OnQuickEventPlayerWin>,
+  mut query: Query<&mut Health, With<Player>>,
+) {
+  for _ in player_win_reader.iter() {
+    if let Some(mut health) = query.iter_mut().next() {
+      // maybe move the player to a safe area?
+      health.fill_health();
+    }
   }
 }
