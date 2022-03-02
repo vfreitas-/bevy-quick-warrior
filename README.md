@@ -4,3 +4,10 @@ A game about fighting with a quick twist of an unfair advantage. Made with the [
 
 The theme is: **Unfair Advantage**
 
+## How to play
+
+Controls:
+
+- **WASD** for movement
+- **F** to attack
+- **Space** to dash
