@@ -40,7 +40,7 @@ fn main() {
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .add_plugins(DefaultPlugins)
     .add_plugin(AnimationPlugin::default())
-    .add_state(GameState::Starting)
+    .add_state(GameState::MainMenu)
     .add_plugin(physics::AppPhysicsPlugin)
     .add_plugin(level::LevelPlugin)
     .add_plugin(camera::CameraPlugin)

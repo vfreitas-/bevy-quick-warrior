@@ -2,35 +2,39 @@ use bevy::prelude::*;
 use crate::{
   GameState, 
   character::Health, 
-  player::Player, score::Score, utils::ecs::should_run
+  player::Player, score::Score
 };
 
 mod utils;
 mod quick_event;
 mod game_over;
+mod main_menu;
 pub use utils::*;
 use quick_event::*;
 use game_over::*;
-
-#[derive(SystemLabel, Debug, Hash, PartialEq, Eq, Clone)]
-enum UiLabel {
-  Setup,
-  HUD,
-}
+use main_menu::*;
 
 pub struct UIPlugin;
 
 impl Plugin for UIPlugin {
   fn build(&self, app: &mut App) {
     app
+      .add_startup_system(ui_setup)
+      .add_system_set(
+        SystemSet::on_enter(GameState::MainMenu)
+          .with_system(ui_main_menu_spawn)
+      )
+      .add_system_set(
+        SystemSet::on_update(GameState::MainMenu)
+          .with_system(main_menu_input)
+      )
+      .add_system_set(
+        SystemSet::on_exit(GameState::MainMenu)
+          .with_system(main_menu_despawn)
+      )
       .add_system_set(
         SystemSet::on_enter(GameState::Starting)
-          .with_system(ui_setup.label(UiLabel::Setup))
-          .with_system(
-            ui_player_spawn
-              .label(UiLabel::HUD)
-              .after(UiLabel::Setup)
-          )
+          .with_system(ui_player_spawn)
       )
       .add_system_set(
         SystemSet::on_update(GameState::Running)
