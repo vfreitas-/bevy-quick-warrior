@@ -167,14 +167,16 @@ fn ui_health_bar (
     for entity in query_ui.iter_mut() {
       if !query_health_child.is_empty() {
         for (index, mut visibility) in query_health_child.iter_mut().enumerate() {
-          if (index + 1) > player_health.health {
-            visibility.is_visible = false;
-          }
+          visibility.is_visible = if (index + 1) <= player_health.health {
+            true
+          } else {
+            false
+          };
         }
       } else {
         commands.entity(entity)
           .with_children(|parent| {
-            for _ in 0..player_health.max_health {
+            for index in 0..player_health.max_health {
               parent.spawn_bundle(
                 ImageBundle {
                   image: UiImage(asset_server.load("Art/UI/Health.png")),
@@ -185,6 +187,9 @@ fn ui_health_bar (
                       ..Default::default()
                     },
                     ..Default::default()
+                  },
+                  visibility: Visibility {
+                    is_visible: if (index + 1) <= player_health.health { true } else { false },
                   },
                   ..Default::default()
                 },
