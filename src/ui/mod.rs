@@ -7,8 +7,12 @@ use crate::{
   player::Player
 };
 
+mod utils;
 mod quick_event;
+mod game_over;
+pub use utils::*;
 use quick_event::*;
+use game_over::*;
 
 pub struct UIPlugin;
 
@@ -39,6 +43,18 @@ impl Plugin for UIPlugin {
       .add_system_set(
         SystemSet::on_exit(GameState::TimedEvent)
           .with_system(ui_quick_event_despawn)
+      )
+      .add_system_set(
+        SystemSet::on_enter(GameState::GameOver)
+          .with_system(ui_game_over_spawn)
+      )
+      .add_system_set(
+        SystemSet::on_update(GameState::GameOver)
+          .with_system(game_over_input)
+      )
+      .add_system_set(
+        SystemSet::on_exit(GameState::GameOver)
+          .with_system(game_over_despawn)
       );
   }
 }

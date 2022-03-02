@@ -16,7 +16,7 @@ mod ui;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-enum GameState {
+pub enum GameState {
   MainMenu,
   Starting,
   Running,

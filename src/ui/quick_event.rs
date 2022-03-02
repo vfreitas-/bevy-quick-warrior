@@ -423,7 +423,7 @@ pub fn ui_quick_event_results (
                 align_items: AlignItems::Center,
                 ..Default::default()
               },
-              color: Color::rgba(0., 0., 0., 0.75).into(),
+              color: Color::rgba(0., 0., 0., 0.90).into(),
               ..Default::default()
             }
           )
