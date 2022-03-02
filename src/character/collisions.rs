@@ -57,7 +57,7 @@ pub fn damage (
       if is_player(layers_1) && is_enemy(layers_2) {
         Some(entity_1)
       } else if is_player(layers_2) && is_enemy(layers_1) {
-        Some(entity_1)
+        Some(entity_2)
       } else {
         None
       }
