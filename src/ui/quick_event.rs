@@ -26,7 +26,7 @@ impl Default for UIQuickEventCountdown {
   fn default () -> Self {
     Self {
       duration: Timer::from_seconds(1., true),
-      count: 3,
+      count: 2,
     }
   }
 }
@@ -135,7 +135,7 @@ pub fn ui_quick_event_spawn (
                     ..Default::default()
                   },
                   text: Text::with_section(
-                    "Press the random key assigned to the player fastest as you can to win the duel!",
+                    "Press the random keys fastest as you can to win the duel!",
                     TextStyle {
                       font: asset_server.load("Fonts/KenneyPixel.ttf"),
                       font_size: 24.0,
@@ -207,20 +207,39 @@ pub fn ui_quick_event_spawn (
                 );
 
                 parent.spawn_bundle(
-                  ImageBundle {
-                    image: UiImage(asset_server.load(quick_event_data.keybind.sprite)),
+                  NodeBundle {
                     style: Style {
-                      size: Size::new(Val::Px(64.0), Val::Px(64.0)),
-                      margin: Rect {
-                        bottom: Val::Px(24.),
-                        ..Default::default()
-                      },
+                      justify_content: JustifyContent::Center,
+                      align_items: AlignItems::Center,
                       ..Default::default()
                     },
+                    color: Color::NONE.into(),
                     ..Default::default()
                   }
                 )
-                .insert(UIQuickEventPlayerKeySprite);
+                .with_children(|parent| {
+                  let keybinds = quick_event_data.keybinds.clone();
+                  for keybind in keybinds {
+                    println!("keybind: {:?}", keybind);
+                    parent.spawn_bundle(
+                      ImageBundle {
+                        image: UiImage(asset_server.load(keybind.sprite)),
+                        style: Style {
+                          size: Size::new(Val::Px(64.0), Val::Px(64.0)),
+                          margin: Rect {
+                            right: Val::Px(4.),
+                            bottom: Val::Px(24.),
+                            ..Default::default()
+                          },
+                          ..Default::default()
+                        },
+                        ..Default::default()
+                      }
+                    )
+                    .insert(UIQuickEventPlayerKeySprite);
+                  }
+                });
+
 
                 parent.spawn_bundle(
                   TextBundle {
@@ -318,7 +337,7 @@ pub fn ui_quick_event_spawn (
               timer.spawn_bundle(
                 TextBundle {
                   text: Text::with_section(
-                    "3",
+                    "2",
                     TextStyle {
                       font: asset_server.load("Fonts/KenneyPixel.ttf"),
                       font_size: 100.0,
@@ -380,8 +399,7 @@ pub fn ui_update_event_count (
 ) {
   for mut text in query_player.iter_mut() {
     text.sections[0].value = format!(
-      "Press {:?} - {:02} times",
-      quick_event_data.keybind.label,
+      "Pressed {:02} times",
       quick_event_data.player_count
     );
   }

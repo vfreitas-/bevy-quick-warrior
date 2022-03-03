@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::prelude::*;
 
-use crate::{GameState, score::{ScoreTypes, OnScorePoints}};
+use crate::{GameState, score::{ScoreTypes, OnScorePoints}, enemy::Enemy};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum QuickEventState {
@@ -83,10 +83,6 @@ impl Plugin for QuickEventPlugin {
           .with_system(quick_event_listener)
       )
       .add_system_set(
-        SystemSet::on_enter(GameState::TimedEvent)
-          .with_system(quick_event_startup)
-      )
-      .add_system_set(
         SystemSet::on_update(GameState::TimedEvent)
           .with_system(quick_event_input)
           .with_system(quick_event_time_track)
@@ -103,16 +99,15 @@ impl Plugin for QuickEventPlugin {
 pub struct QuickEvent {
   pub state: QuickEventState,
   duration: f32,
-  // Keys pressed per second
-  enemy_speed: f32,
+  enemy_division: usize, 
 }
 
 impl Default for QuickEvent {
   fn default () -> Self {
     Self {
       state: QuickEventState::Start,
-      duration: 5.,
-      enemy_speed: 1.,
+      duration: 5.0,
+      enemy_division: 21,
     }
   }
 }
@@ -120,8 +115,11 @@ impl Default for QuickEvent {
 #[derive(Debug, Clone)]
 pub struct QuickEventData {
   pub keybind: KeyBind,
+  pub keybinds: Vec<KeyBind>,
   pub player_count: usize,
   pub enemy_count: usize,
+  pub enemies_quantity: usize,
+  pub enemy_speed: f32,
   pub time_passed: f32,
   pub winner: Option<QuickEventWinner>,
 }
@@ -130,8 +128,11 @@ impl Default for QuickEventData {
   fn default () -> Self {
     Self {
       keybind: KEYBINDS[0].clone(),
+      keybinds: Vec::new(),
       player_count: 0,
       enemy_count: 0,
+      enemies_quantity: 0,
+      enemy_speed: 0.083,
       time_passed: 0.0,
       winner: None,
     }
@@ -139,16 +140,43 @@ impl Default for QuickEventData {
 }
 
 fn quick_event_listener (
+  q_enemies: Query<&Enemy>,
+  quick_event: Res<QuickEvent>,
   mut quick_event_data: ResMut<QuickEventData>,
   mut events: EventReader<OnQuickEvent>,
   mut state: ResMut<State<GameState>>,
 ) {
   for _ in events.iter() {
     if &GameState::Running == state.current() {
-      let mut rng = rand::thread_rng();
-      let index = rng.gen_range(0..35);
+      let count = q_enemies.iter().count();
 
-      quick_event_data.keybind = KEYBINDS[index as usize].clone();
+      let steps = if count > quick_event.enemy_division {
+        (count / quick_event.enemy_division) + 1
+      } else {
+        1
+      };
+      
+      let count = count as f32 * 1.5;
+      quick_event_data.enemy_speed = if count as f32 <= quick_event.duration {
+        (count as f32) / quick_event.duration
+      } else {
+        1.0 / ((count as f32) / quick_event.duration)
+      };
+
+      println!("enemy_speed: {:?}", quick_event_data.enemy_speed);
+      let mut indices = Vec::new();
+      for _ in 0..steps {
+        let mut index = 0;
+        loop {
+          let mut rng = rand::thread_rng();
+          index = rng.gen_range(0..35);
+          if !indices.contains(&index) {
+            break; 
+          }
+        }
+        indices.push(index);
+        quick_event_data.keybinds.push(KEYBINDS[index as usize].clone());
+      }
 
       if let Err(changed) = state.set(GameState::TimedEvent) {
         println!("[QuickEvent] {:?}", changed);
@@ -157,28 +185,24 @@ fn quick_event_listener (
   }
 }
 
-fn quick_event_startup () {}
-
 fn quick_event_input (
   keyboard_input: Res<Input<KeyCode>>,
   quick_event: Res<QuickEvent>,
   mut quick_event_data: ResMut<QuickEventData>,
-  mut state: ResMut<State<GameState>>,
 ) {
   if quick_event.state != QuickEventState::Running {
     return;
   }
 
-  let enemy_interval = quick_event.enemy_speed / quick_event.duration;
-  quick_event_data.enemy_count = (quick_event_data.time_passed / enemy_interval).floor() as usize;
+  quick_event_data.enemy_count = (
+    quick_event_data.time_passed / quick_event_data.enemy_speed
+  ).floor() as usize;
 
-  if keyboard_input.just_pressed(quick_event_data.keybind.key) {
-    quick_event_data.player_count += 1;
-  }
+  let keybinds = quick_event_data.keybinds.clone();
 
-  if keyboard_input.just_pressed(KeyCode::Tab) {
-    if &GameState::TimedEvent == state.current() {
-      state.set(GameState::Running).unwrap();
+  for keybind in keybinds {
+    if keyboard_input.just_pressed(keybind.key) {
+      quick_event_data.player_count += 1;
     }
   }
 }
@@ -221,8 +245,9 @@ fn quick_event_on_end (
     if &GameState::TimedEvent == state.current() {
       quick_event.state = QuickEventState::Start;
       if quick_event_data.winner == Some(QuickEventWinner::Player) {
-        // return to the game and send an event to the player and level
-        state.set(GameState::Running).unwrap();
+        if let Err(changed) = state.set(GameState::Running) {
+          println!("[QuickEvent] {:?}", changed);
+        }
         player_win_writer.send(OnQuickEventPlayerWin);
         score_writer.send(OnScorePoints(ScoreTypes::Duel));
         
