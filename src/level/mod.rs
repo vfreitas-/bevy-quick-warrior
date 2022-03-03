@@ -24,6 +24,7 @@ impl Plugin for LevelPlugin {
       .add_system_set(
         SystemSet::on_update(GameState::Running)
           .with_system(spawn_enemies_constant)
+          .with_system(enemy_removed)
       )
       .add_system_set(
         SystemSet::on_enter(GameState::GameOver)

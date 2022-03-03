@@ -42,6 +42,10 @@ pub fn spawn_enemies_constant(
     return;
   }
 
+  if spawn_data.enemy_count > 90 {
+    return;
+  }
+
   let mut rng = rand::thread_rng();
   let max = rng.gen_range(spawn_data.min_enemies..spawn_data.max_enemies);
 
@@ -61,4 +65,13 @@ pub fn spawn_enemies_constant(
   spawn_data.wave += 1;
   spawn_data.min_enemies = (spawn_data.wave / 4) as usize + 1;
   spawn_data.max_enemies = (spawn_data.wave / 2) as usize + 3;
+}
+
+pub fn enemy_removed (
+  query: RemovedComponents<Enemy>,
+  mut spawn_data: ResMut<SpawnData>,
+) {
+  for _ in query.iter() {
+    spawn_data.enemy_count -= 1;
+  }
 }
