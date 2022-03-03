@@ -1,4 +1,6 @@
 use crate::physics::Layer;
+use crate::quick_event::OnQuickEventPlayerWin;
+use crate::score::{OnScorePoints, ScoreTypes};
 use crate::{GameState, player::Player};
 use crate::utils::vec2::*;
 use bevy::math::Vec3Swizzles;
@@ -10,6 +12,7 @@ pub struct EnemyPlugin;
 impl Plugin for EnemyPlugin {
   fn build(&self, app: &mut App) {
     app
+      .add_system(enemy_on_player_win)
       .add_system_set(
         SystemSet::on_update(GameState::Running)
           .with_system(enemy_follow_player)
@@ -50,7 +53,7 @@ pub fn enemy_spawn(
   .insert(RotationConstraints::lock())
   .insert(CollisionLayers::none()
     .with_group(Layer::Enemy)
-    .with_masks(&[Layer::World, Layer::Enemy, Layer::Player, Layer::PlayerHitbox])
+    .with_masks(&[Layer::World, Layer::Enemy, Layer::Player, Layer::PlayerHitbox, Layer::PlayerHurtbox])
   )
   .insert(Enemy);
 }
@@ -89,5 +92,19 @@ pub fn enemy_despawn (
 ) {
   for entity in query.iter() {
     commands.entity(entity).despawn_recursive();
+  }
+}
+
+fn enemy_on_player_win (
+  mut commands: Commands,
+  query: Query<Entity, With<Enemy>>,
+  mut score_writer: EventWriter<OnScorePoints>,
+  mut player_win_reader: EventReader<OnQuickEventPlayerWin>,
+) {
+  for _ in player_win_reader.iter() {
+    for entity in query.iter() {
+      score_writer.send(OnScorePoints(ScoreTypes::Enemy));
+      commands.entity(entity).despawn_recursive();
+    }
   }
 }

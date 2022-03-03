@@ -163,7 +163,6 @@ fn quick_event_listener (
         1.0 / ((count as f32) / quick_event.duration)
       };
 
-      println!("enemy_speed: {:?}", quick_event_data.enemy_speed);
       let mut indices = Vec::new();
       for _ in 0..steps {
         let mut index = 0;

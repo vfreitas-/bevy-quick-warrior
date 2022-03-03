@@ -220,7 +220,6 @@ pub fn ui_quick_event_spawn (
                 .with_children(|parent| {
                   let keybinds = quick_event_data.keybinds.clone();
                   for keybind in keybinds {
-                    println!("keybind: {:?}", keybind);
                     parent.spawn_bundle(
                       ImageBundle {
                         image: UiImage(asset_server.load(keybind.sprite)),
