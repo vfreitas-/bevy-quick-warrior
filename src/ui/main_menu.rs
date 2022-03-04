@@ -31,6 +31,36 @@ pub fn ui_main_menu_spawn(
     let font = asset_server.load("Fonts/KenneyPixel.ttf");
 
     root.spawn_bundle(
+      NodeBundle {
+        style: Style {
+          position_type: PositionType::Absolute,
+          size: Size::new(Val::Percent(100.), Val::Percent(100.)),
+          justify_content: JustifyContent::Center,
+          align_items: AlignItems::FlexEnd,
+          padding: Rect {
+            top: Val::Px(115.),
+            ..Default::default()
+          },
+          ..Default::default()
+        },
+        color: Color::NONE.into(),
+        ..Default::default()
+      }
+    )
+    .with_children(|parent| {
+      parent.spawn_bundle(
+        ImageBundle {
+          image: UiImage(asset_server.load("Art/UI/Axe.png")),
+          style: Style {
+            size: Size::new(Val::Px(350.), Val::Px(350.)),
+            ..Default::default()
+          },
+          ..Default::default()
+        },
+      );
+    });
+
+    root.spawn_bundle(
       basic_text("Quick Warrior", 96.0, font.clone(), Some(64.)),
     );
 
