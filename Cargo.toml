@@ -23,7 +23,6 @@ default = [
   "bevy/render",
   "bevy/png",
   "bevy/x11",
-  "bevy_kira_audio/ogg",
   "heron/2d",
 ]
 
@@ -42,7 +41,6 @@ bevy = { version = "0.6", default-features = false }
 heron = { version = "2.0.1", default-features = false }
 bevy_ecs_tilemap = "0.5.0"
 benimator = "2.0.1"
-bevy_kira_audio = "0.8.0"
 bevy-inspector-egui = { version = "0.8.2", optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]

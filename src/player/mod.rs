@@ -120,7 +120,7 @@ fn player_setup(
       texture_atlas: textures.add(
         TextureAtlas::from_grid(
           asset_server.load("Art/Character/Attack.png"),
-          Vec2::new(24., 24.),
+          Vec2::new(20., 20.),
           8,
           1
         )
