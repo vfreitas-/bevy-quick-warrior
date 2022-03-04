@@ -28,18 +28,16 @@ pub fn kill_enemy(
 ) {
   events
     .iter()
-    // We care about when the entities "start" to collide
     .filter(|e| e.is_started())
     .filter_map(|event| {
       let (entity_1, entity_2) = event.rigid_body_entities();
       let (layers_1, layers_2) = event.collision_layers();
-      // println!("{:?}", event);
+
       if is_player_hitbox(layers_1) && is_enemy(layers_2) {
         Some(entity_2)
       } else if is_player_hitbox(layers_2) && is_enemy(layers_1) {
         Some(entity_1)
       } else {
-        // This event is not the collision between an enemy and the player. We can ignore it.
         None
       }
     })
@@ -56,7 +54,6 @@ pub fn damage (
 ) {
   events
     .iter()
-    // We care about when the entities "start" to collide
     .filter(|e| e.is_started())
     .filter_map(|event| {
       let (entity_1, entity_2) = event.rigid_body_entities();
@@ -75,7 +72,7 @@ pub fn damage (
         if !health.is_invincible {
           health.decrease_health(1);
         }
-        if health.health <= 0 {
+        if health.health == 0 {
           event_writer.send(OnQuickEvent);
         }
       }
