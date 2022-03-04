@@ -72,6 +72,8 @@ pub fn enemy_removed (
   mut spawn_data: ResMut<SpawnData>,
 ) {
   for _ in query.iter() {
-    spawn_data.enemy_count -= 1;
+    if spawn_data.enemy_count > 1 {
+      spawn_data.enemy_count -= 1;
+    }
   }
 }
