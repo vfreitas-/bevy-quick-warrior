@@ -10,6 +10,6 @@
 **/*.rs.bk
 
 
-build
+dist
 
 .DS_Store
