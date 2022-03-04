@@ -72,7 +72,7 @@ fn enemy_follow_player (
         player_transform.translation.xy()
       );
 
-      let input_velocity = direction * 2000. * time.delta_seconds();
+      let input_velocity = direction * 3000. * time.delta_seconds();
       velocity.linear = Vec3::new(input_velocity.x, input_velocity.y, 1.);
     }
   }

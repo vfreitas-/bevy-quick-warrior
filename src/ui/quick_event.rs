@@ -39,7 +39,7 @@ pub struct UIQuickEventResults {
 impl Default for UIQuickEventResults {
   fn default () -> Self {
     Self {
-      duration: Timer::from_seconds(5., false),
+      duration: Timer::from_seconds(3.5, false),
     }
   }
 }

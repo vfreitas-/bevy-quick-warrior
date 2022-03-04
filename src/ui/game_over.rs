@@ -47,7 +47,7 @@ pub fn ui_game_over_spawn(
 
     let text = if score.points <= 3000 {
       "You were very slow"
-    } else if score.points <= 10000 {
+    } else if score.points <= 15000 {
       "You did well, but could be quicker"
     } else {
       "You are quicker as a bullet. Congrats!"
@@ -58,7 +58,7 @@ pub fn ui_game_over_spawn(
     );
 
     root.spawn_bundle(
-      basic_text("Press space to try again or ESC to quit.", 24., font.clone(), None),
+      basic_text("Press space to try again.", 24., font.clone(), None),
     );
 
   });

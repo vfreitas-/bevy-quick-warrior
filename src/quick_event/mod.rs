@@ -156,7 +156,7 @@ fn quick_event_listener (
         1
       };
       
-      let count = count as f32 * 1.5;
+      let count = count as f32 * 2.0;
       quick_event_data.enemy_speed = if count as f32 <= quick_event.duration {
         (count as f32) / quick_event.duration
       } else {
