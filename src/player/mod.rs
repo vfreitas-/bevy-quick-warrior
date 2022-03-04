@@ -120,8 +120,8 @@ fn player_setup(
       texture_atlas: textures.add(
         TextureAtlas::from_grid(
           asset_server.load("Art/Character/Attack.png"),
-          Vec2::new(16., 16.),
-          4,
+          Vec2::new(24., 24.),
+          8,
           1
         )
       ),
@@ -134,7 +134,7 @@ fn player_setup(
       },
       ..Default::default()
     })
-    .insert(animations.attack.clone())
+    .insert(animations.attack_x.clone())
     .insert(SensorShape)
     .insert(CollisionShape::Cuboid { 
       half_extends: Vec3::new(10., 7., 1.),
@@ -203,34 +203,50 @@ fn player_input(
 
 fn player_movement(
   time: Res<Time>,
+  animations: Res<PlayerAnimations>,
   mut query: Query<(&mut Velocity, &PlayerMovement), With<Player>>,
-  mut query_hitbox: Query<(&mut Transform, &mut CollisionShape), With<PlayerHitbox>>,
+  mut query_hitbox: Query<(
+    &mut Transform, 
+    &mut CollisionShape,
+    &mut TextureAtlasSprite,
+    &mut Handle<SpriteSheetAnimation>
+  ), With<PlayerHitbox>>,
 ) {
   if let Some((mut velocity, player_movement)) = query.iter_mut().next() {
-    if let Some((mut hitbox_transform, mut shape)) = query_hitbox.iter_mut().next() {
-
+    if let Some((
+      mut hitbox_transform, 
+      mut shape,
+      mut sprite,
+      mut animation
+    )) = query_hitbox.iter_mut().next() {
       if player_movement.velocity.x > 0. {
         hitbox_transform.translation = Vec3::new(16., 0., 1.);
-        hitbox_transform.rotation = Quat::from_rotation_z(-1.58);
+        sprite.flip_x = false;
+        *animation = animations.attack_x.clone();
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(7., 10., 1.),
           border_radius: None,
         };
       } else if player_movement.velocity.x < 0. {
         hitbox_transform.translation = Vec3::new(-16., 0., 1.);
-        hitbox_transform.rotation = Quat::from_rotation_z(1.58);
+        sprite.flip_x = true;
+        *animation = animations.attack_x.clone();
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(7., 10., 1.),
           border_radius: None,
         };
       } else if player_movement.velocity.y > 0. {
         hitbox_transform.translation = Vec3::new(0., 16., 1.);
+        sprite.flip_y = false;
+        *animation = animations.attack_y.clone();
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(10., 7., 1.),
           border_radius: None,
         };
       } else if player_movement.velocity.y < 0. {
         hitbox_transform.translation = Vec3::new(0., -16., 1.);
+        sprite.flip_y = true;
+        *animation = animations.attack_y.clone();
         *shape = CollisionShape::Cuboid { 
           half_extends: Vec3::new(10., 7., 1.),
           border_radius: None,
