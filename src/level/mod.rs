@@ -12,19 +12,19 @@ impl Plugin for LevelPlugin {
   fn build(&self, app: &mut App) {
     app
       .init_resource::<SpawnData>()
+      .add_system_to_stage(CoreStage::PostUpdate, enemy_removed)
       .add_system_set(
         SystemSet::on_enter(GameState::Starting)
           .with_system(level_startup)
           .with_system(spawn_startup)
       )
       .add_system_set(
-        SystemSet::on_enter(GameState::Starting)
+        SystemSet::on_update(GameState::Starting)
           .with_system(running)
       )
       .add_system_set(
         SystemSet::on_update(GameState::Running)
           .with_system(spawn_enemies_constant)
-          .with_system(enemy_removed)
       )
       .add_system_set(
         SystemSet::on_enter(GameState::GameOver)
